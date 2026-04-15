@@ -40,7 +40,17 @@ Response:
 ------
 Now that you have understood all the above, select the correct reserach assistant for the following question.
 Question: {user_question}
-Response:
+
+OUTPUT RULES (MANDATORY):
+1) Return ONLY one valid JSON object.
+2) Do NOT include markdown, backticks, comments, or extra text.
+3) The JSON must contain exactly these keys:
+   - "assistant_type": string
+   - "assistant_instructions": string
+   - "user_question": string
+4) "assistant_instructions" must be specific and actionable for research tasks.
+
+Response (JSON only):
 
 """ 
 
@@ -60,6 +70,14 @@ You must respond with a list of queries such as query1, query2, query3 in the fo
     {{"search_query": "query2", "user_question": "{user_question}" }},
     {{"search_query": "query3", "user_question": "{user_question}" }}
 ]
+
+OUTPUT RULES (MANDATORY):
+1) Return ONLY one valid JSON array.
+2) Do NOT include markdown, backticks, comments, or extra text.
+3) Each item MUST be an object with keys:
+   - "search_query": non-empty string
+   - "user_question": string
+4) Return exactly {num_search_queries} items.
 """
 
 WEB_SEARCH_PROMPT_TEMPLATE = PromptTemplate.from_template(
