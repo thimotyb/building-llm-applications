@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "python": "${workspaceFolder}/env_ch04/Scripts/python.exe"
+            "python": "${workspaceFolder}/ch04/env-ch04/bin/python"
         }
     ]
 }
