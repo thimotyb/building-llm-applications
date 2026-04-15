@@ -45,6 +45,18 @@ ch11/env_ch12/
 /ch11/env_ch10/
 /ch11/env_ch12/
 
+# generic virtual environments
+.venv/
+venv/
+env/
+env-*/
+env_*/
+*/.venv/
+*/venv/
+*/env/
+*/env-*/
+*/env_*/
+
 # notebook checkpoints
 apE/.ipynb_checkpoints
 ch01/.ipynb_checkpoints
