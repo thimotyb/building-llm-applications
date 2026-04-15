@@ -7,4 +7,6 @@ Set-ExecutionPolicy -ExecutionPolicy AllSigned -Scope CurrentUser
 
 ------
 Sequence of installations:
-pip install langchain langchain-openai langchain-community requests bs4 duckduckgo-search
+pip install langchain langchain-openai langchain-community requests bs4 duckduckgo-
+------
+add launch.json to vscode to enable debugger and venv
