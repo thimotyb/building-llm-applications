@@ -4,7 +4,7 @@ from utils.web_searching import web_search
 from utils.web_scraping import web_scrape
 import json
 from typing import Dict, Any, List
-from graph_logging import invoke_llm, log_dump, log_info, log_step
+from graph_logging import invoke_llm, log_compact_dump, log_dump, log_info, log_step, message_text
 
 NUM_SEARCH_QUERIES = 3
 NUM_SEARCH_RESULTS_PER_QUERY = 3
@@ -104,7 +104,7 @@ def generate_search_queries(state: Dict[str, Any]) -> Dict[str, Any]:
     # Get the LLM response
     llm = get_llm()
     response = invoke_llm(llm, prompt, "web search query generation")
-    response_text = response.content
+    response_text = message_text(response)
     
     # Parse the response to get the search queries
     try:
@@ -268,7 +268,7 @@ def summarize_search_results(state: Dict[str, Any]) -> Dict[str, Any]:
                 max_prompt_chars=4000,
                 max_output_chars=3000,
             )
-            text_summary = summary_response.content
+            text_summary = message_text(summary_response)
             
             # Add a note about fallback sources
             if is_fallback:
@@ -284,7 +284,7 @@ def summarize_search_results(state: Dict[str, Any]) -> Dict[str, Any]:
             }
             
             summaries.append(summary)
-            log_dump("Search text summary payload", summary, icon="📦", max_chars=3500)
+            log_compact_dump("Search text summary payload", summary, icon="📦", max_chars=2000)
             log_info(f"Successfully summarized content from: {result_url}", icon="✅")
         except Exception as e:
             log_info(f"Error summarizing {result_url}: {str(e)}", icon="⚠️")
@@ -303,7 +303,7 @@ def summarize_search_results(state: Dict[str, Any]) -> Dict[str, Any]:
     else:
         research_summary = "No relevant information found. Please try different search queries."
         log_info("Warning: no summaries were generated from search results", icon="⚠️")
-    log_dump("Merged research summary", research_summary, icon="📚", max_chars=5000)
+    log_compact_dump("Merged research summary", research_summary, icon="📚", max_chars=2000)
     
     # Return the updated state
     return {
@@ -321,13 +321,17 @@ def evaluate_search_relevance(state: Dict[str, Any]) -> Dict[str, Any]:
     user_question = state["user_question"]
     research_summary = state.get("research_summary", "")
     used_fallback_search = state.get("used_fallback_search", False)
+    iteration_count = state.get("iteration_count", 0) + 1
     
     log_info("Evaluating relevance of search summaries to the original question...", icon="🧪")
     
     # If there are no summaries, we need to regenerate queries
     if not search_summaries or not research_summary:
         log_info("No search summaries found. Regenerating search queries...", icon="⚠️")
-        return {"should_regenerate_queries": True}
+        return {
+            "iteration_count": iteration_count,
+            "should_regenerate_queries": True,
+        }
     
     # Use the LLM to evaluate relevance
     llm = get_llm()
@@ -363,7 +367,7 @@ def evaluate_search_relevance(state: Dict[str, Any]) -> Dict[str, Any]:
             max_prompt_chars=5000,
             max_output_chars=3000,
         )
-        evaluation_text = evaluation_response.content
+        evaluation_text = message_text(evaluation_response)
         
         # Extract the JSON from the response
         try:
@@ -386,14 +390,21 @@ def evaluate_search_relevance(state: Dict[str, Any]) -> Dict[str, Any]:
                 log_info(f"{relevance_percentage}% of search results are relevant. Proceeding to write research report...", icon="✅")
             
             return {
+                "iteration_count": iteration_count,
                 "relevance_evaluation": evaluation,
                 "should_regenerate_queries": should_regenerate
             }
         except Exception as e:
             log_info(f"Error parsing relevance evaluation: {str(e)}", icon="⚠️")
             # If we can't parse the evaluation, assume we need to regenerate
-            return {"should_regenerate_queries": True}
+            return {
+                "iteration_count": iteration_count,
+                "should_regenerate_queries": True,
+            }
     except Exception as e:
         log_info(f"Error during relevance evaluation: {str(e)}", icon="⚠️")
         # If there's an error, assume we need to regenerate
-        return {"should_regenerate_queries": True}
+        return {
+            "iteration_count": iteration_count,
+            "should_regenerate_queries": True,
+        }

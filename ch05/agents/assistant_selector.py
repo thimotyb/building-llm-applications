@@ -3,7 +3,7 @@ from prompts import ASSISTANT_SELECTION_PROMPT_TEMPLATE
 from langchain_core.output_parsers import StrOutputParser
 import json
 from typing import Dict, Any
-from graph_logging import invoke_llm, log_dump, log_info
+from graph_logging import invoke_llm, log_dump, log_info, message_text
 
 def select_assistant(state: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -17,7 +17,7 @@ def select_assistant(state: Dict[str, Any]) -> Dict[str, Any]:
     # Get the LLM response
     llm = get_llm()
     response = invoke_llm(llm, prompt, "assistant selection")
-    response_text = response.content
+    response_text = message_text(response)
     
     # Parse the response to get the assistant info
     try:

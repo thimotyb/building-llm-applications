@@ -2,12 +2,16 @@ from langchain_core.tools import tool
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, Dict, Any, List, Annotated, Tuple
 import os
+from pathlib import Path
 
 from models import ResearchState
 from agents.assistant_selector import select_assistant
 from agents.web_researcher import generate_search_queries, perform_web_searches, summarize_search_results, evaluate_search_relevance
 from agents.report_writer import write_research_report
-from graph_logging import log_info, log_node, log_research_state, log_step
+from graph_logging import configure_file_logging, log_info, log_node, log_research_state, log_step
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_LOG_FILE = PROJECT_ROOT / "logs" / "ch05-research.log"
 
 def create_research_graph() -> StateGraph:
     """
@@ -30,30 +34,25 @@ def create_research_graph() -> StateGraph:
         Route to either generate new search queries or continue to report writing
         based on the relevance evaluation.
         """
-        # Get the current iteration count
+        # This value is persisted by evaluate_search_relevance. Mutating state
+        # inside a conditional router is not written back by LangGraph.
         iteration_count = state.get("iteration_count", 0)
         
-        # Increment the iteration count
-        new_iteration_count = iteration_count + 1
-        
-        # Update the state with the new iteration count
-        state["iteration_count"] = new_iteration_count
-        
         # Check if we've reached the maximum number of iterations (3)
-        if new_iteration_count >= 3:
+        if iteration_count >= 3:
             log_info(
-                f"Reached maximum iterations ({new_iteration_count}). Proceeding to write report with current results.",
+                f"Reached maximum iterations ({iteration_count}). Proceeding to write report with current results.",
                 icon="🔁",
             )
             return "write_research_report"
         
         # Otherwise, check if we should regenerate queries
         if state.get("should_regenerate_queries", False):
-            log_info(f"Iteration {new_iteration_count}: Regenerating search queries.", icon="🔁")
+            log_info(f"Iteration {iteration_count}: Regenerating search queries.", icon="🔁")
             return "generate_search_queries"
         else:
             log_info(
-                f"Iteration {new_iteration_count}: Search results are relevant. Proceeding to write report.",
+                f"Iteration {iteration_count}: Search results are relevant. Proceeding to write report.",
                 icon="✅",
             )
             return "write_research_report"
@@ -91,7 +90,10 @@ def run_research(question: str) -> str:
     Returns:
         The final research report
     """
+    log_file = os.getenv("CH05_LOG_FILE") or str(DEFAULT_LOG_FILE)
+    log_path = configure_file_logging(log_file, truncate=True)
     log_step("Pipeline start", details=f'Question: "{question}"', icon="🎬")
+    log_info(f"Writing execution log to: {log_path}", icon="🧾")
 
     # Create the graph
     research_graph = create_research_graph()
