@@ -7,6 +7,7 @@ from models import ResearchState
 from agents.assistant_selector import select_assistant
 from agents.web_researcher import generate_search_queries, perform_web_searches, summarize_search_results, evaluate_search_relevance
 from agents.report_writer import write_research_report
+from graph_logging import log_info, log_node, log_research_state, log_step
 
 def create_research_graph() -> StateGraph:
     """
@@ -16,12 +17,12 @@ def create_research_graph() -> StateGraph:
     graph = StateGraph(ResearchState)
     
     # Add nodes to the graph
-    graph.add_node("select_assistant", select_assistant)
-    graph.add_node("generate_search_queries", generate_search_queries)
-    graph.add_node("perform_web_searches", perform_web_searches)
-    graph.add_node("summarize_search_results", summarize_search_results)
-    graph.add_node("evaluate_search_relevance", evaluate_search_relevance)
-    graph.add_node("write_research_report", write_research_report)
+    graph.add_node("select_assistant", log_node("select_assistant", select_assistant))
+    graph.add_node("generate_search_queries", log_node("generate_search_queries", generate_search_queries))
+    graph.add_node("perform_web_searches", log_node("perform_web_searches", perform_web_searches))
+    graph.add_node("summarize_search_results", log_node("summarize_search_results", summarize_search_results))
+    graph.add_node("evaluate_search_relevance", log_node("evaluate_search_relevance", evaluate_search_relevance))
+    graph.add_node("write_research_report", log_node("write_research_report", write_research_report))
     
     # Define the conditional routing function for relevance evaluation
     def route_based_on_relevance(state: Dict[str, Any]) -> str:
@@ -40,15 +41,21 @@ def create_research_graph() -> StateGraph:
         
         # Check if we've reached the maximum number of iterations (3)
         if new_iteration_count >= 3:
-            print(f"Reached maximum iterations ({new_iteration_count}). Proceeding to write report with current results.")
+            log_info(
+                f"Reached maximum iterations ({new_iteration_count}). Proceeding to write report with current results.",
+                icon="🔁",
+            )
             return "write_research_report"
         
         # Otherwise, check if we should regenerate queries
         if state.get("should_regenerate_queries", False):
-            print(f"Iteration {new_iteration_count}: Regenerating search queries.")
+            log_info(f"Iteration {new_iteration_count}: Regenerating search queries.", icon="🔁")
             return "generate_search_queries"
         else:
-            print(f"Iteration {new_iteration_count}: Search results are relevant. Proceeding to write report.")
+            log_info(
+                f"Iteration {new_iteration_count}: Search results are relevant. Proceeding to write report.",
+                icon="✅",
+            )
             return "write_research_report"
     
     # Define the flow of the graph
@@ -84,6 +91,8 @@ def run_research(question: str) -> str:
     Returns:
         The final research report
     """
+    log_step("Pipeline start", details=f'Question: "{question}"', icon="🎬")
+
     # Create the graph
     research_graph = create_research_graph()
     
@@ -104,9 +113,11 @@ def run_research(question: str) -> str:
         "should_regenerate_queries": None,
         "iteration_count": 0
     }
+    log_research_state("Initial ResearchState", initial_state, icon="🧭")
     
     # Run the graph
     result = app.invoke(initial_state)
+    log_research_state("Final ResearchState", result, icon="🏁")
     
     # Extract and return the final report
     return result["final_report"]

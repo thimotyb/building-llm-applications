@@ -4,6 +4,7 @@ from utils.web_searching import web_search
 from utils.web_scraping import web_scrape
 import json
 from typing import Dict, Any, List
+from graph_logging import invoke_llm, log_dump, log_info, log_step
 
 NUM_SEARCH_QUERIES = 3
 NUM_SEARCH_RESULTS_PER_QUERY = 3
@@ -28,7 +29,7 @@ def generate_search_queries(state: Dict[str, Any]) -> Dict[str, Any]:
     # Format the prompt based on iteration count
     if iteration_count == 0:
         # First-time query generation
-        print("Generating initial search queries...")
+        log_info("Generating initial search queries...", icon="📝")
         prompt = WEB_SEARCH_PROMPT_TEMPLATE.format(
             assistant_instructions=assistant_instructions,
             user_question=user_question,
@@ -36,7 +37,7 @@ def generate_search_queries(state: Dict[str, Any]) -> Dict[str, Any]:
         )
     elif iteration_count == 1:
         # Second iteration - more specific queries
-        print("First regeneration: Creating more specific queries...")
+        log_info("First regeneration: creating more specific queries...", icon="📝")
         previous_query_list = ", ".join([q["search_query"] for q in previous_queries])
         relevance_percentage = relevance_evaluation.get("relevance_percentage", 0) if relevance_evaluation else 0
         relevance_explanation = relevance_evaluation.get("explanation", "No explanation provided") if relevance_evaluation else ""
@@ -67,7 +68,7 @@ def generate_search_queries(state: Dict[str, Any]) -> Dict[str, Any]:
         """
     else:
         # Third or later iteration - completely different approach
-        print(f"Iteration {iteration_count}: Using alternative search strategies...")
+        log_info(f"Iteration {iteration_count}: using alternative search strategies...", icon="📝")
         all_previous_queries = ", ".join([q["search_query"] for q in previous_queries])
         
         prompt = f"""
@@ -102,7 +103,7 @@ def generate_search_queries(state: Dict[str, Any]) -> Dict[str, Any]:
     
     # Get the LLM response
     llm = get_llm()
-    response = llm.invoke(prompt)
+    response = invoke_llm(llm, prompt, "web search query generation")
     response_text = response.content
     
     # Parse the response to get the search queries
@@ -115,9 +116,10 @@ def generate_search_queries(state: Dict[str, Any]) -> Dict[str, Any]:
         # Parse the JSON
         search_queries = json.loads(json_str)
         
-        print(f"Generated {len(search_queries)} search queries")
+        log_dump("Web search queries JSON list", search_queries, icon="📦", max_chars=3000)
+        log_info(f"Generated {len(search_queries)} search queries", icon="🔎")
         for i, query in enumerate(search_queries):
-            print(f"  Query {i+1}: {query['search_query']}")
+            log_info(f"Query {i+1}: {query['search_query']}", icon="🔎")
         
         # Return the updated state
         return {
@@ -127,12 +129,13 @@ def generate_search_queries(state: Dict[str, Any]) -> Dict[str, Any]:
             "should_regenerate_queries": None
         }
     except Exception as e:
-        print(f"Error parsing search queries: {str(e)}")
+        log_info(f"Error parsing search queries: {str(e)}", icon="⚠️")
         # Fallback to a default search query if parsing fails
         default_queries = [
             {"search_query": f"{user_question} iteration {iteration_count + 1}", "user_question": user_question}
         ]
-        print(f"Using default query: {default_queries[0]['search_query']}")
+        log_dump("Default web search queries JSON list", default_queries, icon="📦", max_chars=3000)
+        log_info(f"Using default query: {default_queries[0]['search_query']}", icon="🔎")
         return {
             "search_queries": default_queries,
             "relevance_evaluation": None,
@@ -147,7 +150,7 @@ def perform_web_searches(state: Dict[str, Any]) -> Dict[str, Any]:
     search_results = []
     fallback_used = False
     
-    print(f"Performing web searches for {len(search_queries)} queries...")
+    log_info(f"Performing web searches for {len(search_queries)} queries...", icon="🌐")
     
     # For each search query, get the search results
     for query_obj in search_queries:
@@ -156,12 +159,13 @@ def perform_web_searches(state: Dict[str, Any]) -> Dict[str, Any]:
         
         try:
             # Get the search results
-            print(f"Searching for: {search_query}")
+            log_step("Execute web search", details=f'Query: "{search_query}"', icon="🌐")
             urls = web_search(web_query=search_query, num_results=NUM_SEARCH_RESULTS_PER_QUERY)
+            log_dump("Raw web search URLs", urls, icon="🔗", max_chars=3000)
             
             # Check if these are likely fallback results (Wikipedia URLs)
             if any("wikipedia.org" in url for url in urls[:2]):
-                print(f"Fallback search was used for query: {search_query}")
+                log_info(f"Fallback search was used for query: {search_query}", icon="⚠️")
                 fallback_used = True
                 is_fallback = True
             else:
@@ -176,15 +180,15 @@ def perform_web_searches(state: Dict[str, Any]) -> Dict[str, Any]:
                     "is_fallback": is_fallback
                 })
                 
-            print(f"Found {len(urls)} results for query: {search_query}")
+            log_info(f"Found {len(urls)} results for query: {search_query}", icon="🔗")
         except Exception as e:
-            print(f"Error searching for '{search_query}': {str(e)}")
+            log_info(f"Error searching for '{search_query}': {str(e)}", icon="⚠️")
             # Continue with other queries even if one fails
             continue
     
     # If we have no search results at all, add a fallback result
     if not search_results:
-        print("No search results found. Using general fallback information.")
+        log_info("No search results found. Using general fallback information.", icon="⚠️")
         fallback_url = "https://en.wikipedia.org/wiki/Main_Page"
         search_results.append({
             "result_url": fallback_url,
@@ -193,6 +197,8 @@ def perform_web_searches(state: Dict[str, Any]) -> Dict[str, Any]:
             "is_fallback": True
         })
         fallback_used = True
+
+    log_dump("Expanded URL objects (search results)", search_results, icon="📦", max_chars=5000)
     
     # Return the updated state with information about fallback usage
     return {
@@ -209,7 +215,7 @@ def summarize_search_results(state: Dict[str, Any]) -> Dict[str, Any]:
     llm = get_llm()
     summaries = []
     
-    print(f"Summarizing {len(search_results)} search results...")
+    log_info(f"Summarizing {len(search_results)} search results...", icon="✍️")
     
     # For each search result, get the text and summarize it
     for result in search_results:
@@ -220,12 +226,13 @@ def summarize_search_results(state: Dict[str, Any]) -> Dict[str, Any]:
         
         try:
             # Get the webpage content
-            print(f"Scraping content from: {result_url}")
+            log_step("Scrape source page", details=f"URL: {result_url}", icon="🕸️")
             search_result_text = web_scrape(url=result_url)[:RESULT_TEXT_MAX_CHARACTERS]
+            log_info(f"Scraped chars: {len(search_result_text)}", icon="📄")
             
             # Skip if the content is an error message or too short
             if search_result_text.startswith("Failed to") or len(search_result_text) < 50:
-                print(f"Skipping {result_url} due to scraping issues or insufficient content")
+                log_info(f"Skipping {result_url} due to scraping issues or insufficient content", icon="⚠️")
                 continue
             
             # Format the prompt, with additional context for fallback results
@@ -254,7 +261,13 @@ def summarize_search_results(state: Dict[str, Any]) -> Dict[str, Any]:
                 )
             
             # Get the summary
-            summary_response = llm.invoke(prompt)
+            summary_response = invoke_llm(
+                llm,
+                prompt,
+                f"page summary: {result_url}",
+                max_prompt_chars=4000,
+                max_output_chars=3000,
+            )
             text_summary = summary_response.content
             
             # Add a note about fallback sources
@@ -271,16 +284,17 @@ def summarize_search_results(state: Dict[str, Any]) -> Dict[str, Any]:
             }
             
             summaries.append(summary)
-            print(f"Successfully summarized content from: {result_url}")
+            log_dump("Search text summary payload", summary, icon="📦", max_chars=3500)
+            log_info(f"Successfully summarized content from: {result_url}", icon="✅")
         except Exception as e:
-            print(f"Error summarizing {result_url}: {str(e)}")
+            log_info(f"Error summarizing {result_url}: {str(e)}", icon="⚠️")
             # Skip this result if there's an error
             continue
     
     # Create the research summary
     if summaries:
         research_summary = "\n\n".join([s["summary"] for s in summaries])
-        print(f"Created research summary with {len(summaries)} sources")
+        log_info(f"Created research summary with {len(summaries)} sources", icon="📚")
         
         # Add a note if fallback search was used
         if used_fallback_search:
@@ -288,7 +302,8 @@ def summarize_search_results(state: Dict[str, Any]) -> Dict[str, Any]:
             research_summary += fallback_note
     else:
         research_summary = "No relevant information found. Please try different search queries."
-        print("Warning: No summaries were generated from search results")
+        log_info("Warning: no summaries were generated from search results", icon="⚠️")
+    log_dump("Merged research summary", research_summary, icon="📚", max_chars=5000)
     
     # Return the updated state
     return {
@@ -307,11 +322,11 @@ def evaluate_search_relevance(state: Dict[str, Any]) -> Dict[str, Any]:
     research_summary = state.get("research_summary", "")
     used_fallback_search = state.get("used_fallback_search", False)
     
-    print("Evaluating relevance of search summaries to the original question...")
+    log_info("Evaluating relevance of search summaries to the original question...", icon="🧪")
     
     # If there are no summaries, we need to regenerate queries
     if not search_summaries or not research_summary:
-        print("No search summaries found. Regenerating search queries...")
+        log_info("No search summaries found. Regenerating search queries...", icon="⚠️")
         return {"should_regenerate_queries": True}
     
     # Use the LLM to evaluate relevance
@@ -341,7 +356,13 @@ def evaluate_search_relevance(state: Dict[str, Any]) -> Dict[str, Any]:
     
     try:
         # Get the evaluation from the LLM
-        evaluation_response = llm.invoke(evaluation_prompt)
+        evaluation_response = invoke_llm(
+            llm,
+            evaluation_prompt,
+            "search relevance evaluation",
+            max_prompt_chars=5000,
+            max_output_chars=3000,
+        )
         evaluation_text = evaluation_response.content
         
         # Extract the JSON from the response
@@ -353,25 +374,26 @@ def evaluate_search_relevance(state: Dict[str, Any]) -> Dict[str, Any]:
             
             # Parse the JSON
             evaluation = json.loads(json_str)
+            log_dump("Search relevance evaluation JSON object", evaluation, icon="📦", max_chars=3000)
             relevance_percentage = evaluation.get("relevance_percentage", 0)
             
             # Determine if we should regenerate queries (less than 50% relevant)
             should_regenerate = relevance_percentage < 50
             
             if should_regenerate:
-                print(f"Only {relevance_percentage}% of search results are relevant. Regenerating search queries...")
+                log_info(f"Only {relevance_percentage}% of search results are relevant. Regenerating search queries...", icon="🔁")
             else:
-                print(f"{relevance_percentage}% of search results are relevant. Proceeding to write research report...")
+                log_info(f"{relevance_percentage}% of search results are relevant. Proceeding to write research report...", icon="✅")
             
             return {
                 "relevance_evaluation": evaluation,
                 "should_regenerate_queries": should_regenerate
             }
         except Exception as e:
-            print(f"Error parsing relevance evaluation: {str(e)}")
+            log_info(f"Error parsing relevance evaluation: {str(e)}", icon="⚠️")
             # If we can't parse the evaluation, assume we need to regenerate
             return {"should_regenerate_queries": True}
     except Exception as e:
-        print(f"Error during relevance evaluation: {str(e)}")
+        log_info(f"Error during relevance evaluation: {str(e)}", icon="⚠️")
         # If there's an error, assume we need to regenerate
         return {"should_regenerate_queries": True}

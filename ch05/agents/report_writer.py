@@ -1,6 +1,7 @@
 from models import get_llm
 from prompts import RESEARCH_REPORT_PROMPT_TEMPLATE
 from typing import Dict, Any
+from graph_logging import invoke_llm, log_dump
 
 def write_research_report(state: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -17,8 +18,9 @@ def write_research_report(state: Dict[str, Any]) -> Dict[str, Any]:
     
     # Get the LLM response
     llm = get_llm()
-    response = llm.invoke(prompt)
+    response = invoke_llm(llm, prompt, "final research report", max_output_chars=5000)
     report = response.content
+    log_dump("Final research report", report, icon="📘", max_chars=5000)
     
     # Return the updated state
     return {"final_report": report}
