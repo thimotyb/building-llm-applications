@@ -1,10 +1,12 @@
 from chain_5_1 import web_research_chain
+from chain_logging import log_dump, log_step
 
 # test chain invocation
 question = 'What can I see and do in the Spanish town of Astorga?'
+log_step("RUN chain_try_5_1", details=f'Question: "{question}"', icon="🧪")
 
 web_research_report = web_research_chain.invoke(question)
-print(web_research_report)
+log_dump("Final web research report", web_research_report, icon="📘", max_chars=6000)
 
 # Result
 # # Introduction
