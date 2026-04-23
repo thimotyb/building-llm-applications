@@ -124,11 +124,6 @@ if not sanitized_web_search_queries_list:
     )
 
 web_search_queries_list = sanitized_web_search_queries_list
-if len(web_search_queries_list) != NUM_SEARCH_QUERIES:
-    raise RuntimeError(
-        f"Invalid web search query JSON: expected {NUM_SEARCH_QUERIES} queries, "
-        f"got {len(web_search_queries_list)}."
-    )
 log_info(f"Generated {len(web_search_queries_list)} search queries")
 for idx, item in enumerate(web_search_queries_list, start=1):
     log_info(f'Query {idx}: {item["search_query"]}')
