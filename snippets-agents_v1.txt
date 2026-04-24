@@ -75,3 +75,16 @@ python labs/m1/main.py
 ls -la
 git status
 deactivate
+
+## M11 - Download database vettoriale pre-calcolato (Ollama)
+# Scarica il DB già pronto per risparmiare tempo sugli embedding
+cd ch11
+mkdir -p vectorstore_db
+wget -O database_ollama.zip https://agents-course.netlify.app/assets/database_ollama.zip
+unzip database_ollama.zip -d vectorstore_db/
+rm database_ollama.zip
+
+## M12 - Setup Database Hotel (SQLite)
+# Crea il database SQL necessario per gli esercizi sulla prenotazione hotel
+cd ch11
+./env_ch11/bin/python setup_hotel_db.py

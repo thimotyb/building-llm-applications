@@ -126,3 +126,4 @@ ch05/utils/__pycache__/
 ch04/.env
 ch05/.env
 ch11/.env
+vectorstore_ollama.zip

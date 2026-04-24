@@ -45,6 +45,12 @@ python main_01_01.py
 * **Environment:** `env_config.load_env()` loads the project-root `.env` file and applies shared defaults.
 * **Model factory:** `llm_factory.get_chat_model()` and `llm_factory.get_embeddings_model()` select OpenAI, Ollama, or Gemini from `LLM_PROVIDER`.
 * **Vector store:** Pages fetched with `AsyncHtmlLoader`, chunked and embedded with the configured embeddings provider, stored in **Chroma**.
+  * **Distribuzione rapida:** Se hai scaricato un database già pronto, copialo in `ch11/vectorstore_db/<provider>/` (es. `ch11/vectorstore_db/ollama/chroma.sqlite3`). Il programma lo rileverà automaticamente saltando la fase di embedding.
+  * **Download via terminale (Linux/WSL):**
+    ```bash
+    # Sostituisci ID_FILE con quello fornito dal docente
+    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=ID_FILE' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=ID_FILE" -O database.zip && rm -rf /tmp/cookies.txt
+    ```
 * **Tool:** `search_travel_info` performs similarity search and returns top chunks.
 * **LangGraph:**
   * `chatbot` node -> LLM (may emit tool_calls).
