@@ -12,7 +12,7 @@ import random
 
 from langchain_community.document_loaders import AsyncHtmlLoader
 from langchain_community.vectorstores import Chroma
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from llm_factory import get_chat_model, get_embeddings_model
 from langchain_core.messages import BaseMessage, HumanMessage, ToolMessage
 from langchain_core.tools import tool
@@ -26,6 +26,16 @@ from langgraph.prebuilt import tools_condition
 
 ENV = load_env() #A
 #A load environment variables from the project root .env file
+
+_model_map = {
+    "openai": (ENV.openai_model,  ENV.openai_embedding_model),
+    "ollama": (ENV.ollama_model,  ENV.ollama_embedding_model),
+    "gemini": (ENV.gemini_model,  ENV.gemini_embedding_model),
+}
+_active_model, _active_embed = _model_map.get(ENV.llm_provider, ("?", "?"))
+print(f"⚙️  Provider : {ENV.llm_provider}")
+print(f"🤖 Model    : {_active_model}")
+print(f"📐 Embed    : {_active_embed}")
 
 # -----------------------------------------------------------------------------
 # 1. Prepare knowledge base at startup
@@ -152,7 +162,9 @@ class ToolsExecutionNode: #A
             tool_name = tool_call["name"] #H
             tool_args = tool_call["args"] #I
             tool = self._tools_by_name[tool_name] #J
+            print(f"🔧 [tools] → {tool_name}  args={tool_args}")
             result = tool.invoke(tool_args) #K
+            print(f"📄 [tools] ← {tool_name}  ({len(str(result))} chars)")
             tool_messages.append(
                 ToolMessage(
                     content=json.dumps(result), #L
@@ -184,11 +196,17 @@ tools_execution_node = ToolsExecutionNode(TOOLS) #N
 # LLM node
 # ----------------------------------------------------------------------------
 
-def llm_node(state: AgentState): #A    
+def llm_node(state: AgentState): #A
     """LLM node that decides whether to call the search tool."""
     current_messages = state["messages"] #B
+    print(f"🧠 [llm_node] Invoking LLM  (messages in state: {len(current_messages)})")
     respose_message = llm_with_tools.invoke(current_messages) #C
-
+    tool_calls = getattr(respose_message, "tool_calls", [])
+    if tool_calls:
+        names = ", ".join(tc["name"] for tc in tool_calls)
+        print(f"🔀 [llm_node] → tool call(s): {names}")
+    else:
+        print("✅ [llm_node] → final answer ready")
     return {"messages": [respose_message]} #D
 
 #A Define the LLM node

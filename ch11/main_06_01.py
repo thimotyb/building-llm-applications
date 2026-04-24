@@ -12,7 +12,7 @@ import random
 
 from langchain_community.document_loaders import AsyncHtmlLoader
 from langchain_community.vectorstores import Chroma
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from llm_factory import get_chat_model, get_embeddings_model
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.managed.is_last_step import RemainingSteps
@@ -29,6 +29,16 @@ from langgraph_supervisor.supervisor import create_supervisor
 
 ENV = load_env() #A
 #A load environment variables from the project root .env file
+
+_model_map = {
+    "openai": (ENV.openai_model,  ENV.openai_embedding_model),
+    "ollama": (ENV.ollama_model,  ENV.ollama_embedding_model),
+    "gemini": (ENV.gemini_model,  ENV.gemini_embedding_model),
+}
+_active_model, _active_embed = _model_map.get(ENV.llm_provider, ("?", "?"))
+print(f"⚙️  Provider : {ENV.llm_provider}")
+print(f"🤖 Model    : {_active_model}")
+print(f"📐 Embed    : {_active_embed}")
 
 # -----------------------------------------------------------------------------
 # 1. Prepare knowledge base at startup
@@ -89,8 +99,10 @@ ti_retriever = ti_vectorstore_client.as_retriever() #K
 @tool(description="Search travel information about destinations in England.") #A
 def search_travel_info(query: str) -> str: #B
     """Search embedded WikiVoyage content for information about destinations in England."""
+    print(f"🔍 [search_travel_info] query='{query}'")
     docs = ti_retriever.invoke(query) #C
     top = docs[:4] if isinstance(docs, list) else docs #C
+    print(f"📄 [search_travel_info] → {len(top)} chunks returned")
     return "\n---\n".join(d.page_content for d in top) #D
 
 #A Define the tool using the @tool decorator
