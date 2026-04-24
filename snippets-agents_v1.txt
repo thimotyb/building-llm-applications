@@ -16,10 +16,10 @@ sudo systemctl start ollama
 sudo systemctl status ollama
 
 ## M1 - Setup 3: Modello locale Gemma
-ollama pull gemma4:e4b
+ollama pull gemma4:e2b
 ollama pull nomic-embed-text
 ollama list
-ollama run gemma4:e4b "Write one sentence about AI agents."
+ollama run gemma4:e2b "Write one sentence about AI agents."
 
 ## M1 - Setup 4: Ambiente Python (venv)
 git clone https://github.com/thimotyb/building-llm-applications.git

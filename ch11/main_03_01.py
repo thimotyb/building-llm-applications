@@ -9,10 +9,8 @@ from typing import Annotated, Sequence, TypedDict, Literal, Optional
 from env_config import load_env
 import random
 
-from langchain_community.document_loaders import AsyncHtmlLoader
-from langchain_community.vectorstores import Chroma
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from llm_factory import get_chat_model, get_embeddings_model
+from vectorstore_manager import get_travel_info_vectorstore
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.managed.is_last_step import RemainingSteps
 from langchain_core.tools import tool
@@ -47,43 +45,10 @@ UK_DESTINATIONS = [ #A
     "West_Cornwall",
 ]
 
-async def build_vectorstore(destinations: Sequence[str]) -> Chroma: #B
-    """Download WikiVoyage pages and create a Chroma vector store."""
-    urls = [f"https://en.wikivoyage.org/wiki/{slug}" for slug in destinations] #C
-    loader = AsyncHtmlLoader(urls) #C
-    print("Downloading destination pages ...") #C
-    docs = await loader.aload() #C
-
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1024, chunk_overlap=128) #D
-    chunks = sum([splitter.split_documents([d]) for d in docs], []) #D
-
-    print(f"Embedding {len(chunks)} chunks ...") #E
-    vectordb_client = Chroma.from_documents(chunks, embedding=get_embeddings_model()) #E
-    print("Vector store ready.\n")
-    return vectordb_client #F
-
-
-# Singleton pattern (build once)
-_ti_vectorstore_client: Chroma | None = None #G
-
-def get_travel_info_vectorstore() -> Chroma: #H
-    global _ti_vectorstore_client
-    if _ti_vectorstore_client is None:
-        _ti_vectorstore_client = asyncio.run(build_vectorstore(UK_DESTINATIONS))
-    return _ti_vectorstore_client #I
-
-ti_vectorstore_client = get_travel_info_vectorstore() #J
+ti_vectorstore_client = get_travel_info_vectorstore(UK_DESTINATIONS) #J
 ti_retriever = ti_vectorstore_client.as_retriever() #K
 
 #A Destination list; you can add more destinations here
-#B Function to build the vectorstore and return a reference to the vectorstore client
-#C Load the destination pages asynchronously from the web into a list of documents
-#D Split the documents into chunks of 1024 characters with 128 characters of overlap    
-#E Embed the chunks and store them in the vectorstore
-#F Return the vectorstore client
-#G Initialize a cache for the vectorstore client instance as None
-#H Function to trigger the creation of the vectorstore and return a reference to the cache of its client instance
-#I Return the a reference to the cache of the vectorstore client instance
 #J Instantiate the vectorstore client
 #K Instantiate the vectorstore retriever
 
