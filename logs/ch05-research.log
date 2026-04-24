@@ -1,0 +1,1300 @@
+
+================================================================================
+🎬 Pipeline start
+  Question: "What can you tell me about Astorga's roman spas"
+  🧾 Writing execution log to: logs/ch05-research.log
+
+================================================================================
+🧭 Initial ResearchState (compact)
+{
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "assistant_info": null,
+  "search_queries": null,
+  "search_results": null,
+  "search_summaries": null,
+  "research_summary": null,
+  "final_report": null,
+  "used_fallback_search": false,
+  "relevance_evaluation": null,
+  "should_regenerate_queries": null,
+  "iteration_count": 0
+}
+
+================================================================================
+➡️ ENTER LangGraph node: select_assistant
+
+================================================================================
+🧭 ResearchState input (select_assistant) (compact)
+{
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "assistant_info": null,
+  "search_queries": null,
+  "search_results": null,
+  "search_summaries": null,
+  "research_summary": null,
+  "final_report": null,
+  "used_fallback_search": false,
+  "relevance_evaluation": null,
+  "should_regenerate_queries": null,
+  "iteration_count": 0
+}
+  🤖 LLM call: assistant selection
+  📝 LLM response chars (assistant selection): 376
+
+================================================================================
+📦 Assistant selection JSON object
+{
+  "assistant_type": "Tour guide assistant",
+  "assistant_instructions": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights.",
+  "user_question": "What can you tell me about Astorga's roman spas"
+}
+
+================================================================================
+📤 Node output (select_assistant) (compact)
+{
+  "assistant_info": {
+    "assistant_type": "Tour guide assistant",
+    "assistant_instructions": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights.",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  }
+}
+
+================================================================================
+⬅️ EXIT LangGraph node: select_assistant
+
+================================================================================
+➡️ ENTER LangGraph node: generate_search_queries
+
+================================================================================
+🧭 ResearchState input (generate_search_queries) (compact)
+{
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "assistant_info": {
+    "assistant_type": "Tour guide assistant",
+    "assistant_instructions": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights.",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  },
+  "search_queries": null,
+  "search_results": null,
+  "search_summaries": null,
+  "research_summary": null,
+  "final_report": null,
+  "used_fallback_search": false,
+  "relevance_evaluation": null,
+  "should_regenerate_queries": null,
+  "iteration_count": 0
+}
+  📝 Generating initial search queries...
+  🤖 LLM call: web search query generation
+  📝 LLM response chars (web search query generation): 519
+
+================================================================================
+📦 Web search queries JSON list
+[
+  {
+    "search_query": "history and archaeological significance of Roman baths in Asturica Augusta Astorga",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  },
+  {
+    "search_query": "Astorga Roman Route Major and Minor Baths architectural layout and functions",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  },
+  {
+    "search_query": "visiting the Roman baths in Astorga Spain museum exhibits and preservation",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  }
+]
+  🔎 Generated 3 search queries
+  🔎 Query 1: history and archaeological significance of Roman baths in Asturica Augusta Astorga
+  🔎 Query 2: Astorga Roman Route Major and Minor Baths architectural layout and functions
+  🔎 Query 3: visiting the Roman baths in Astorga Spain museum exhibits and preservation
+
+================================================================================
+📤 Node output (generate_search_queries) (compact)
+{
+  "search_queries": {
+    "type": "list",
+    "count": 3,
+    "first": {
+      "search_query": {
+        "type": "str",
+        "chars": 82,
+        "preview": "history and archaeological significance of Roman baths in Asturica Augusta Astorga"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      }
+    }
+  },
+  "relevance_evaluation": null,
+  "should_regenerate_queries": null
+}
+
+================================================================================
+⬅️ EXIT LangGraph node: generate_search_queries
+
+================================================================================
+➡️ ENTER LangGraph node: perform_web_searches
+
+================================================================================
+🧭 ResearchState input (perform_web_searches) (compact)
+{
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "assistant_info": {
+    "assistant_type": "Tour guide assistant",
+    "assistant_instructions": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights.",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  },
+  "search_queries": {
+    "type": "list",
+    "count": 3,
+    "first": {
+      "search_query": {
+        "type": "str",
+        "chars": 82,
+        "preview": "history and archaeological significance of Roman baths in Asturica Augusta Astorga"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      }
+    }
+  },
+  "search_results": null,
+  "search_summaries": null,
+  "research_summary": null,
+  "final_report": null,
+  "used_fallback_search": false,
+  "relevance_evaluation": null,
+  "should_regenerate_queries": null,
+  "iteration_count": 0
+}
+  🌐 Performing web searches for 3 queries...
+
+================================================================================
+🌐 Execute web search
+  Query: "history and archaeological significance of Roman baths in Asturica Augusta Astorga"
+Impersonate 'chrome_114' does not exist, using 'random'
+
+================================================================================
+🔗 Raw web search URLs
+[
+  "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android",
+  "https://support.google.com/chrome/answer/95589?hl=en-CO&co=GENIE.Platform=Desktop",
+  "https://support.google.com/chrome/thread/335893733/chrome-browsing-history?hl=en"
+]
+  🔗 Found 3 results for query: history and archaeological significance of Roman baths in Asturica Augusta Astorga
+
+================================================================================
+🌐 Execute web search
+  Query: "Astorga Roman Route Major and Minor Baths architectural layout and functions"
+Rate limiting: Waiting 1.36 seconds before next search request...
+
+================================================================================
+🔗 Raw web search URLs
+[
+  "https://www.zhihu.com/question/14245536577",
+  "https://www.zhihu.com/tardis/bd/art/662107134",
+  "https://jingyan.baidu.com/article/fa4125ac92c0ad69ad709221.html"
+]
+  🔗 Found 3 results for query: Astorga Roman Route Major and Minor Baths architectural layout and functions
+
+================================================================================
+🌐 Execute web search
+  Query: "visiting the Roman baths in Astorga Spain museum exhibits and preservation"
+Rate limiting: Waiting 2.13 seconds before next search request...
+
+================================================================================
+🔗 Raw web search URLs
+[
+  "https://whichmuseum.com/museum/roman-museum-of-astorga-34518",
+  "https://www.tripadvisor.com/Attractions-g668532-Activities-Astorga_Province_of_Leon_Castile_and_Leon.html",
+  "https://www.nomads-travel-guide.com/city/astorga/"
+]
+  🔗 Found 3 results for query: visiting the Roman baths in Astorga Spain museum exhibits and preservation
+
+================================================================================
+📦 Expanded URL objects (search results)
+[
+  {
+    "result_url": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android",
+    "search_query": "history and archaeological significance of Roman baths in Asturica Augusta Astorga",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://support.google.com/chrome/answer/95589?hl=en-CO&co=GENIE.Platform=Desktop",
+    "search_query": "history and archaeological significance of Roman baths in Asturica Augusta Astorga",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://support.google.com/chrome/thread/335893733/chrome-browsing-history?hl=en",
+    "search_query": "history and archaeological significance of Roman baths in Asturica Augusta Astorga",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://www.zhihu.com/question/14245536577",
+    "search_query": "Astorga Roman Route Major and Minor Baths architectural layout and functions",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://www.zhihu.com/tardis/bd/art/662107134",
+    "search_query": "Astorga Roman Route Major and Minor Baths architectural layout and functions",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://jingyan.baidu.com/article/fa4125ac92c0ad69ad709221.html",
+    "search_query": "Astorga Roman Route Major and Minor Baths architectural layout and functions",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://whichmuseum.com/museum/roman-museum-of-astorga-34518",
+    "search_query": "visiting the Roman baths in Astorga Spain museum exhibits and preservation",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://www.tripadvisor.com/Attractions-g668532-Activities-Astorga_Province_of_Leon_Castile_and_Leon.html",
+    "search_query": "visiting the Roman baths in Astorga Spain museum exhibits and preservation",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://www.nomads-travel-guide.com/city/astorga/",
+    "search_query": "visiting the Roman baths in Astorga Spain museum exhibits and preservation",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  }
+]
+
+================================================================================
+📤 Node output (perform_web_searches) (compact)
+{
+  "search_results": {
+    "type": "list",
+    "count": 9,
+    "first": {
+      "result_url": {
+        "type": "str",
+        "chars": 81,
+        "preview": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android"
+      },
+      "search_query": {
+        "type": "str",
+        "chars": 82,
+        "preview": "history and archaeological significance of Roman baths in Asturica Augusta Astorga"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "used_fallback_search": false
+}
+
+================================================================================
+⬅️ EXIT LangGraph node: perform_web_searches
+
+================================================================================
+➡️ ENTER LangGraph node: summarize_search_results
+
+================================================================================
+🧭 ResearchState input (summarize_search_results) (compact)
+{
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "assistant_info": {
+    "assistant_type": "Tour guide assistant",
+    "assistant_instructions": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights.",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  },
+  "search_queries": {
+    "type": "list",
+    "count": 3,
+    "first": {
+      "search_query": {
+        "type": "str",
+        "chars": 82,
+        "preview": "history and archaeological significance of Roman baths in Asturica Augusta Astorga"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      }
+    }
+  },
+  "search_results": {
+    "type": "list",
+    "count": 9,
+    "first": {
+      "result_url": {
+        "type": "str",
+        "chars": 81,
+        "preview": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android"
+      },
+      "search_query": {
+        "type": "str",
+        "chars": 82,
+        "preview": "history and archaeological significance of Roman baths in Asturica Augusta Astorga"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "search_summaries": null,
+  "research_summary": null,
+  "final_report": null,
+  "used_fallback_search": false,
+  "relevance_evaluation": null,
+  "should_regenerate_queries": null,
+  "iteration_count": 0
+}
+  ✍️ Summarizing 9 search results...
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android
+  📄 Scraped chars: 4577
+  🤖 LLM call: page summary: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android
+  📝 LLM response chars (page summary: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android): 1580
+
+================================================================================
+📦 Search text summary payload (compact)
+{
+  "summary": {
+    "type": "str",
+    "chars": 1683,
+    "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+  },
+  "result_url": {
+    "type": "str",
+    "chars": 81,
+    "preview": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android"
+  },
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "is_fallback": false
+}
+  ✅ Successfully summarized content from: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://support.google.com/chrome/answer/95589?hl=en-CO&co=GENIE.Platform=Desktop
+  📄 Scraped chars: 5856
+  🤖 LLM call: page summary: https://support.google.com/chrome/answer/95589?hl=en-CO&co=GENIE.Platform=Desktop
+  📝 LLM response chars (page summary: https://support.google.com/chrome/answer/95589?hl=en-CO&co=GENIE.Platform=Desktop): 1839
+
+================================================================================
+📦 Search text summary payload (compact)
+{
+  "summary": {
+    "type": "str",
+    "chars": 1942,
+    "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-CO&co=GENIE.Platform=Desktop Summary: The provided text does not contain any information regarding the history or a..."
+  },
+  "result_url": {
+    "type": "str",
+    "chars": 81,
+    "preview": "https://support.google.com/chrome/answer/95589?hl=en-CO&co=GENIE.Platform=Desktop"
+  },
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "is_fallback": false
+}
+  ✅ Successfully summarized content from: https://support.google.com/chrome/answer/95589?hl=en-CO&co=GENIE.Platform=Desktop
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://support.google.com/chrome/thread/335893733/chrome-browsing-history?hl=en
+  📄 Scraped chars: 687
+  🤖 LLM call: page summary: https://support.google.com/chrome/thread/335893733/chrome-browsing-history?hl=en
+  📝 LLM response chars (page summary: https://support.google.com/chrome/thread/335893733/chrome-browsing-history?hl=en): 732
+
+================================================================================
+📦 Search text summary payload (compact)
+{
+  "summary": {
+    "type": "str",
+    "chars": 834,
+    "preview": "Source Url: https://support.google.com/chrome/thread/335893733/chrome-browsing-history?hl=en Summary: The provided text does not contain any information regarding the history or ar..."
+  },
+  "result_url": {
+    "type": "str",
+    "chars": 80,
+    "preview": "https://support.google.com/chrome/thread/335893733/chrome-browsing-history?hl=en"
+  },
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "is_fallback": false
+}
+  ✅ Successfully summarized content from: https://support.google.com/chrome/thread/335893733/chrome-browsing-history?hl=en
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://www.zhihu.com/question/14245536577
+  📄 Scraped chars: 47
+  ⚠️ Skipping https://www.zhihu.com/question/14245536577 due to scraping issues or insufficient content
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://www.zhihu.com/tardis/bd/art/662107134
+  📄 Scraped chars: 4072
+  🤖 LLM call: page summary: https://www.zhihu.com/tardis/bd/art/662107134
+  📝 LLM response chars (page summary: https://www.zhihu.com/tardis/bd/art/662107134): 2529
+
+================================================================================
+📦 Search text summary payload (compact)
+{
+  "summary": {
+    "type": "str",
+    "chars": 2596,
+    "preview": "Source Url: https://www.zhihu.com/tardis/bd/art/662107134 Summary: The provided text does not contain any information regarding the Astorga Roman Route or the architectural layout ..."
+  },
+  "result_url": {
+    "type": "str",
+    "chars": 45,
+    "preview": "https://www.zhihu.com/tardis/bd/art/662107134"
+  },
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "is_fallback": false
+}
+  ✅ Successfully summarized content from: https://www.zhihu.com/tardis/bd/art/662107134
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://jingyan.baidu.com/article/fa4125ac92c0ad69ad709221.html
+  📄 Scraped chars: 1439
+  🤖 LLM call: page summary: https://jingyan.baidu.com/article/fa4125ac92c0ad69ad709221.html
+  📝 LLM response chars (page summary: https://jingyan.baidu.com/article/fa4125ac92c0ad69ad709221.html): 1259
+
+================================================================================
+📦 Search text summary payload (compact)
+{
+  "summary": {
+    "type": "str",
+    "chars": 1344,
+    "preview": "Source Url: https://jingyan.baidu.com/article/fa4125ac92c0ad69ad709221.html Summary: The provided text does not contain any information regarding the Astorga Roman Route or the arc..."
+  },
+  "result_url": {
+    "type": "str",
+    "chars": 63,
+    "preview": "https://jingyan.baidu.com/article/fa4125ac92c0ad69ad709221.html"
+  },
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "is_fallback": false
+}
+  ✅ Successfully summarized content from: https://jingyan.baidu.com/article/fa4125ac92c0ad69ad709221.html
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://whichmuseum.com/museum/roman-museum-of-astorga-34518
+  📄 Scraped chars: 7055
+  🤖 LLM call: page summary: https://whichmuseum.com/museum/roman-museum-of-astorga-34518
+  📝 LLM response chars (page summary: https://whichmuseum.com/museum/roman-museum-of-astorga-34518): 1471
+
+================================================================================
+📦 Search text summary payload (compact)
+{
+  "summary": {
+    "type": "str",
+    "chars": 1553,
+    "preview": "Source Url: https://whichmuseum.com/museum/roman-museum-of-astorga-34518 Summary: The provided text does not contain information regarding Roman baths; therefore, here is a summary..."
+  },
+  "result_url": {
+    "type": "str",
+    "chars": 60,
+    "preview": "https://whichmuseum.com/museum/roman-museum-of-astorga-34518"
+  },
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "is_fallback": false
+}
+  ✅ Successfully summarized content from: https://whichmuseum.com/museum/roman-museum-of-astorga-34518
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://www.tripadvisor.com/Attractions-g668532-Activities-Astorga_Province_of_Leon_Castile_and_Leon.html
+  📄 Scraped chars: 47
+  ⚠️ Skipping https://www.tripadvisor.com/Attractions-g668532-Activities-Astorga_Province_of_Leon_Castile_and_Leon.html due to scraping issues or insufficient content
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://www.nomads-travel-guide.com/city/astorga/
+  📄 Scraped chars: 10000
+  🤖 LLM call: page summary: https://www.nomads-travel-guide.com/city/astorga/
+  📝 LLM response chars (page summary: https://www.nomads-travel-guide.com/city/astorga/): 2252
+
+================================================================================
+📦 Search text summary payload (compact)
+{
+  "summary": {
+    "type": "str",
+    "chars": 2323,
+    "preview": "Source Url: https://www.nomads-travel-guide.com/city/astorga/ Summary: The provided text does not mention Roman baths in Astorga. It mentions a **Roman Museum** that displays artif..."
+  },
+  "result_url": {
+    "type": "str",
+    "chars": 49,
+    "preview": "https://www.nomads-travel-guide.com/city/astorga/"
+  },
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "is_fallback": false
+}
+  ✅ Successfully summarized content from: https://www.nomads-travel-guide.com/city/astorga/
+  📚 Created research summary with 7 sources
+
+================================================================================
+📚 Merged research summary (compact)
+{
+  "type": "str",
+  "chars": 12287,
+  "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+}
+
+================================================================================
+📤 Node output (summarize_search_results) (compact)
+{
+  "search_summaries": {
+    "type": "list",
+    "count": 7,
+    "first": {
+      "summary": {
+        "type": "str",
+        "chars": 1683,
+        "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+      },
+      "result_url": {
+        "type": "str",
+        "chars": 81,
+        "preview": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "research_summary": {
+    "type": "str",
+    "chars": 12287,
+    "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+  },
+  "used_fallback_search": false
+}
+
+================================================================================
+⬅️ EXIT LangGraph node: summarize_search_results
+
+================================================================================
+➡️ ENTER LangGraph node: evaluate_search_relevance
+
+================================================================================
+🧭 ResearchState input (evaluate_search_relevance) (compact)
+{
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "assistant_info": {
+    "assistant_type": "Tour guide assistant",
+    "assistant_instructions": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights.",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  },
+  "search_queries": {
+    "type": "list",
+    "count": 3,
+    "first": {
+      "search_query": {
+        "type": "str",
+        "chars": 82,
+        "preview": "history and archaeological significance of Roman baths in Asturica Augusta Astorga"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      }
+    }
+  },
+  "search_results": {
+    "type": "list",
+    "count": 9,
+    "first": {
+      "result_url": {
+        "type": "str",
+        "chars": 81,
+        "preview": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android"
+      },
+      "search_query": {
+        "type": "str",
+        "chars": 82,
+        "preview": "history and archaeological significance of Roman baths in Asturica Augusta Astorga"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "search_summaries": {
+    "type": "list",
+    "count": 7,
+    "first": {
+      "summary": {
+        "type": "str",
+        "chars": 1683,
+        "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+      },
+      "result_url": {
+        "type": "str",
+        "chars": 81,
+        "preview": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "research_summary": {
+    "type": "str",
+    "chars": 12287,
+    "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+  },
+  "final_report": null,
+  "used_fallback_search": false,
+  "relevance_evaluation": null,
+  "should_regenerate_queries": null,
+  "iteration_count": 0
+}
+  🧪 Evaluating relevance of search summaries to the original question...
+  🤖 LLM call: search relevance evaluation
+  📝 LLM response chars (search relevance evaluation): 467
+
+================================================================================
+📦 Search relevance evaluation JSON object
+{
+  "relevance_percentage": 0,
+  "explanation": "None of the provided search results contain information about Roman spas or baths in Astorga. The first five sources are technical guides for Google Chrome or remote desktop software. The final two sources are travel and museum guides for Astorga, but both explicitly state in their summaries that they do not contain information regarding Roman baths.",
+  "relevant_count": 0,
+  "total_count": 7
+}
+  🔁 Only 0% of search results are relevant. Regenerating search queries...
+
+================================================================================
+📤 Node output (evaluate_search_relevance) (compact)
+{
+  "iteration_count": 1,
+  "relevance_evaluation": {
+    "relevance_percentage": 0,
+    "explanation": "None of the provided search results contain information about Roman spas or baths in Astorga. The first five sources are technical guides for Google Chrome or remote desktop software. The final two sources are travel and museum guides for Astorga, but both explicitly state in their summaries that they do not contain information regarding Roman baths.",
+    "relevant_count": 0,
+    "total_count": 7
+  },
+  "should_regenerate_queries": true
+}
+
+================================================================================
+⬅️ EXIT LangGraph node: evaluate_search_relevance
+  🔁 Iteration 1: Regenerating search queries.
+
+================================================================================
+➡️ ENTER LangGraph node: generate_search_queries
+
+================================================================================
+🧭 ResearchState input (generate_search_queries) (compact)
+{
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "assistant_info": {
+    "assistant_type": "Tour guide assistant",
+    "assistant_instructions": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights.",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  },
+  "search_queries": {
+    "type": "list",
+    "count": 3,
+    "first": {
+      "search_query": {
+        "type": "str",
+        "chars": 82,
+        "preview": "history and archaeological significance of Roman baths in Asturica Augusta Astorga"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      }
+    }
+  },
+  "search_results": {
+    "type": "list",
+    "count": 9,
+    "first": {
+      "result_url": {
+        "type": "str",
+        "chars": 81,
+        "preview": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android"
+      },
+      "search_query": {
+        "type": "str",
+        "chars": 82,
+        "preview": "history and archaeological significance of Roman baths in Asturica Augusta Astorga"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "search_summaries": {
+    "type": "list",
+    "count": 7,
+    "first": {
+      "summary": {
+        "type": "str",
+        "chars": 1683,
+        "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+      },
+      "result_url": {
+        "type": "str",
+        "chars": 81,
+        "preview": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "research_summary": {
+    "type": "str",
+    "chars": 12287,
+    "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+  },
+  "final_report": null,
+  "used_fallback_search": false,
+  "relevance_evaluation": {
+    "relevance_percentage": 0,
+    "explanation": "None of the provided search results contain information about Roman spas or baths in Astorga. The first five sources are technical guides for Google Chrome or remote desktop software. The final two sources are travel and museum guides for Astorga, but both explicitly state in their summaries that they do not contain information regarding Roman baths.",
+    "relevant_count": 0,
+    "total_count": 7
+  },
+  "should_regenerate_queries": true,
+  "iteration_count": 1
+}
+  📝 First regeneration: creating more specific queries...
+  🤖 LLM call: web search query generation
+  📝 LLM response chars (web search query generation): 445
+
+================================================================================
+📦 Web search queries JSON list
+[
+  {
+    "search_query": "Astorga Spain archaeological ruins Roman thermal baths",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  },
+  {
+    "search_query": "Asturica Augusta Termas Mayores architectural description",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  },
+  {
+    "search_query": "history of Roman baths in Astorga Leon province",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  }
+]
+  🔎 Generated 3 search queries
+  🔎 Query 1: Astorga Spain archaeological ruins Roman thermal baths
+  🔎 Query 2: Asturica Augusta Termas Mayores architectural description
+  🔎 Query 3: history of Roman baths in Astorga Leon province
+
+================================================================================
+📤 Node output (generate_search_queries) (compact)
+{
+  "search_queries": {
+    "type": "list",
+    "count": 3,
+    "first": {
+      "search_query": {
+        "type": "str",
+        "chars": 54,
+        "preview": "Astorga Spain archaeological ruins Roman thermal baths"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      }
+    }
+  },
+  "relevance_evaluation": null,
+  "should_regenerate_queries": null
+}
+
+================================================================================
+⬅️ EXIT LangGraph node: generate_search_queries
+
+================================================================================
+➡️ ENTER LangGraph node: perform_web_searches
+
+================================================================================
+🧭 ResearchState input (perform_web_searches) (compact)
+{
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "assistant_info": {
+    "assistant_type": "Tour guide assistant",
+    "assistant_instructions": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights.",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  },
+  "search_queries": {
+    "type": "list",
+    "count": 3,
+    "first": {
+      "search_query": {
+        "type": "str",
+        "chars": 54,
+        "preview": "Astorga Spain archaeological ruins Roman thermal baths"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      }
+    }
+  },
+  "search_results": {
+    "type": "list",
+    "count": 9,
+    "first": {
+      "result_url": {
+        "type": "str",
+        "chars": 81,
+        "preview": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android"
+      },
+      "search_query": {
+        "type": "str",
+        "chars": 82,
+        "preview": "history and archaeological significance of Roman baths in Asturica Augusta Astorga"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "search_summaries": {
+    "type": "list",
+    "count": 7,
+    "first": {
+      "summary": {
+        "type": "str",
+        "chars": 1683,
+        "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+      },
+      "result_url": {
+        "type": "str",
+        "chars": 81,
+        "preview": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "research_summary": {
+    "type": "str",
+    "chars": 12287,
+    "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+  },
+  "final_report": null,
+  "used_fallback_search": false,
+  "relevance_evaluation": null,
+  "should_regenerate_queries": null,
+  "iteration_count": 1
+}
+  🌐 Performing web searches for 3 queries...
+
+================================================================================
+🌐 Execute web search
+  Query: "Astorga Spain archaeological ruins Roman thermal baths"
+
+================================================================================
+🔗 Raw web search URLs
+[
+  "https://www.wikiwand.com/en/articles/Astorga,_Spain",
+  "https://humbo.com/es/astorga",
+  "https://loveatfirstadventure.com/astorga-spain/"
+]
+  🔗 Found 3 results for query: Astorga Spain archaeological ruins Roman thermal baths
+
+================================================================================
+🌐 Execute web search
+  Query: "Asturica Augusta Termas Mayores architectural description"
+Rate limiting: Waiting 1.58 seconds before next search request...
+
+================================================================================
+🔗 Raw web search URLs
+[
+  "https://now.dstv.com/",
+  "https://www.dstv.com/en-za/watch/stream-with-dstv/",
+  "https://play.google.com/store/apps/details?id=com.dstvmobile.android&hl=en-US"
+]
+  🔗 Found 3 results for query: Asturica Augusta Termas Mayores architectural description
+
+================================================================================
+🌐 Execute web search
+  Query: "history of Roman baths in Astorga Leon province"
+Rate limiting: Waiting 1.96 seconds before next search request...
+
+================================================================================
+🔗 Raw web search URLs
+[
+  "https://en.wikipedia.org/wiki/Asturica_Augusta",
+  "https://military-history.fandom.com/wiki/Astorga,_Spain",
+  "https://www.youtube.com/watch?v=3R6FKAdkjEo"
+]
+  ⚠️ Fallback search was used for query: history of Roman baths in Astorga Leon province
+  🔗 Found 3 results for query: history of Roman baths in Astorga Leon province
+
+================================================================================
+📦 Expanded URL objects (search results)
+[
+  {
+    "result_url": "https://www.wikiwand.com/en/articles/Astorga,_Spain",
+    "search_query": "Astorga Spain archaeological ruins Roman thermal baths",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://humbo.com/es/astorga",
+    "search_query": "Astorga Spain archaeological ruins Roman thermal baths",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://loveatfirstadventure.com/astorga-spain/",
+    "search_query": "Astorga Spain archaeological ruins Roman thermal baths",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://now.dstv.com/",
+    "search_query": "Asturica Augusta Termas Mayores architectural description",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://www.dstv.com/en-za/watch/stream-with-dstv/",
+    "search_query": "Asturica Augusta Termas Mayores architectural description",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://play.google.com/store/apps/details?id=com.dstvmobile.android&hl=en-US",
+    "search_query": "Asturica Augusta Termas Mayores architectural description",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": false
+  },
+  {
+    "result_url": "https://en.wikipedia.org/wiki/Asturica_Augusta",
+    "search_query": "history of Roman baths in Astorga Leon province",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": true
+  },
+  {
+    "result_url": "https://military-history.fandom.com/wiki/Astorga,_Spain",
+    "search_query": "history of Roman baths in Astorga Leon province",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": true
+  },
+  {
+    "result_url": "https://www.youtube.com/watch?v=3R6FKAdkjEo",
+    "search_query": "history of Roman baths in Astorga Leon province",
+    "user_question": "What can you tell me about Astorga's roman spas",
+    "is_fallback": true
+  }
+]
+
+================================================================================
+📤 Node output (perform_web_searches) (compact)
+{
+  "search_results": {
+    "type": "list",
+    "count": 9,
+    "first": {
+      "result_url": {
+        "type": "str",
+        "chars": 51,
+        "preview": "https://www.wikiwand.com/en/articles/Astorga,_Spain"
+      },
+      "search_query": {
+        "type": "str",
+        "chars": 54,
+        "preview": "Astorga Spain archaeological ruins Roman thermal baths"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "used_fallback_search": true
+}
+
+================================================================================
+⬅️ EXIT LangGraph node: perform_web_searches
+
+================================================================================
+➡️ ENTER LangGraph node: summarize_search_results
+
+================================================================================
+🧭 ResearchState input (summarize_search_results) (compact)
+{
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "assistant_info": {
+    "assistant_type": "Tour guide assistant",
+    "assistant_instructions": "You are a world-travelled AI tour guide assistant. Your main purpose is to draft engaging, insightful, unbiased, and well-structured travel reports on given locations, including history, attractions, and cultural insights.",
+    "user_question": "What can you tell me about Astorga's roman spas"
+  },
+  "search_queries": {
+    "type": "list",
+    "count": 3,
+    "first": {
+      "search_query": {
+        "type": "str",
+        "chars": 54,
+        "preview": "Astorga Spain archaeological ruins Roman thermal baths"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      }
+    }
+  },
+  "search_results": {
+    "type": "list",
+    "count": 9,
+    "first": {
+      "result_url": {
+        "type": "str",
+        "chars": 51,
+        "preview": "https://www.wikiwand.com/en/articles/Astorga,_Spain"
+      },
+      "search_query": {
+        "type": "str",
+        "chars": 54,
+        "preview": "Astorga Spain archaeological ruins Roman thermal baths"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "search_summaries": {
+    "type": "list",
+    "count": 7,
+    "first": {
+      "summary": {
+        "type": "str",
+        "chars": 1683,
+        "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+      },
+      "result_url": {
+        "type": "str",
+        "chars": 81,
+        "preview": "https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android"
+      },
+      "user_question": {
+        "type": "str",
+        "chars": 47,
+        "preview": "What can you tell me about Astorga's roman spas"
+      },
+      "is_fallback": false
+    }
+  },
+  "research_summary": {
+    "type": "str",
+    "chars": 12287,
+    "preview": "Source Url: https://support.google.com/chrome/answer/95589?hl=en-GG&co=GENIE.Platform=Android Summary: The provided text does not contain any information regarding the history or a..."
+  },
+  "final_report": null,
+  "used_fallback_search": true,
+  "relevance_evaluation": null,
+  "should_regenerate_queries": null,
+  "iteration_count": 1
+}
+  ✍️ Summarizing 9 search results...
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://www.wikiwand.com/en/articles/Astorga,_Spain
+  📄 Scraped chars: 47
+  ⚠️ Skipping https://www.wikiwand.com/en/articles/Astorga,_Spain due to scraping issues or insufficient content
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://humbo.com/es/astorga
+  📄 Scraped chars: 4995
+  🤖 LLM call: page summary: https://humbo.com/es/astorga
+  📝 LLM response chars (page summary: https://humbo.com/es/astorga): 261
+
+================================================================================
+📦 Search text summary payload (compact)
+{
+  "summary": {
+    "type": "str",
+    "chars": 311,
+    "preview": "Source Url: https://humbo.com/es/astorga Summary: Astorga, founded in 14 BC as Asturica Augusta, features Roman archaeological ruins including **thermal baths**, sewers, and origin..."
+  },
+  "result_url": {
+    "type": "str",
+    "chars": 28,
+    "preview": "https://humbo.com/es/astorga"
+  },
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "is_fallback": false
+}
+  ✅ Successfully summarized content from: https://humbo.com/es/astorga
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://loveatfirstadventure.com/astorga-spain/
+  📄 Scraped chars: 47
+  ⚠️ Skipping https://loveatfirstadventure.com/astorga-spain/ due to scraping issues or insufficient content
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://now.dstv.com/
+  📄 Scraped chars: 47
+  ⚠️ Skipping https://now.dstv.com/ due to scraping issues or insufficient content
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://www.dstv.com/en-za/watch/stream-with-dstv/
+  📄 Scraped chars: 3338
+  🤖 LLM call: page summary: https://www.dstv.com/en-za/watch/stream-with-dstv/
+  📝 LLM response chars (page summary: https://www.dstv.com/en-za/watch/stream-with-dstv/): 1201
+
+================================================================================
+📦 Search text summary payload (compact)
+{
+  "summary": {
+    "type": "str",
+    "chars": 1273,
+    "preview": "Source Url: https://www.dstv.com/en-za/watch/stream-with-dstv/ Summary: The provided text does not contain information regarding the architectural description of Asturica Augusta T..."
+  },
+  "result_url": {
+    "type": "str",
+    "chars": 50,
+    "preview": "https://www.dstv.com/en-za/watch/stream-with-dstv/"
+  },
+  "user_question": {
+    "type": "str",
+    "chars": 47,
+    "preview": "What can you tell me about Astorga's roman spas"
+  },
+  "is_fallback": false
+}
+  ✅ Successfully summarized content from: https://www.dstv.com/en-za/watch/stream-with-dstv/
+
+================================================================================
+🕸️ Scrape source page
+  URL: https://play.google.com/store/apps/details?id=com.dstvmobile.android&hl=en-US
+  📄 Scraped chars: 120
+  🤖 LLM call: page summary: https://play.google.com/store/apps/details?id=com.dstvmobile.android&hl=en-US

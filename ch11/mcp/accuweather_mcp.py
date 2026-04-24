@@ -2,14 +2,22 @@ import os
 import json
 from typing import Dict
 from fastmcp import FastMCP
-from dotenv import load_dotenv
+from pathlib import Path
+import sys
+
+CURRENT_DIR = Path(__file__).resolve().parent
+CH11_DIR = CURRENT_DIR.parent
+if str(CH11_DIR) not in sys.path:
+    sys.path.insert(0, str(CH11_DIR))
+
+from env_config import load_env
 from aiohttp import ClientSession
 
 #--------------------------------
 # ADAPTED FROM: https://github.com/adhikasp/mcp-weather
 #--------------------------------
 
-load_dotenv() #A
+ENV = load_env() #A
 
 mcp = FastMCP("mcp-accuweather") #B
 
@@ -73,7 +81,7 @@ if __name__ == "__main__":
         host="127.0.0.1", 
         port=8020, path="/accu-mcp-server")
     
-#A - Load environment variables
+#A - Load environment variables from the project root .env file
 #B - Initialize FastMCP
 #C - Define MCP tool
 #D - Get AccuWeather API key

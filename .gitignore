@@ -57,6 +57,10 @@ env_*/
 */env-*/
 */env_*/
 
+# Python bytecode caches
+__pycache__/
+**/__pycache__/
+
 # notebook checkpoints
 apE/.ipynb_checkpoints
 ch01/.ipynb_checkpoints
@@ -110,6 +114,10 @@ ch05/agents/__pycache__/
 ch05/utils/__pycache__/
 
 .idea
+/.env
+.env
+.env.*
+**/.env
 /ch04/.env
 /ch05/.env
 /ch11/.env

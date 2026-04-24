@@ -6,14 +6,14 @@ import os
 import asyncio
 import operator
 from typing import Annotated, Sequence, TypedDict, Literal, Optional, List, Dict
-from dotenv import load_dotenv
+from env_config import load_env
 import random
 
 
 from langchain_community.document_loaders import AsyncHtmlLoader
 from langchain_community.vectorstores import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from llm_factory import get_chat_model, get_embeddings_model
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.managed.is_last_step import RemainingSteps
 from langchain_core.tools import tool
@@ -26,8 +26,8 @@ from langchain_community.agent_toolkits import SQLDatabaseToolkit
 # Load environment variables
 # -----------------------------------------------------------------------------
 
-load_dotenv() #A
-#A load the environment variables from the .env 
+ENV = load_env() #A
+#A load environment variables from the project root .env file
 
 # -----------------------------------------------------------------------------
 # 1. Prepare knowledge base at startup
@@ -51,7 +51,7 @@ async def build_vectorstore(destinations: Sequence[str]) -> Chroma: #B
     chunks = sum([splitter.split_documents([d]) for d in docs], []) #D
 
     print(f"Embedding {len(chunks)} chunks ...") #E
-    vectordb_client = Chroma.from_documents(chunks, embedding=OpenAIEmbeddings()) #E
+    vectordb_client = Chroma.from_documents(chunks, embedding=get_embeddings_model()) #E
     print("Vector store ready.\n")
     return vectordb_client #F
 
@@ -62,8 +62,6 @@ _ti_vectorstore_client: Chroma | None = None #G
 def get_travel_info_vectorstore() -> Chroma: #H
     global _ti_vectorstore_client
     if _ti_vectorstore_client is None:
-        if not os.environ.get("OPENAI_API_KEY"):
-            raise RuntimeError("Set the OPENAI_API_KEY env variable and re-run.")
         _ti_vectorstore_client = asyncio.run(build_vectorstore(UK_DESTINATIONS))
     return _ti_vectorstore_client #I
 
@@ -112,12 +110,12 @@ def weather_forecast(town: str) -> dict:
 # ----------------------------------------------------------------------------
 TOOLS = [search_travel_info, weather_forecast] #A
 
-llm_model = ChatOpenAI(model="gpt-5-mini", #B
+llm_model = get_chat_model(#B
                        use_responses_api=True) #B
 
 
 #A Define the tools list (in our case, only one tool)
-#B Instantiate the LLM model with the gpt-5-mini model and the responses API
+#B Instantiate the LLM model with the configured provider and the responses API
 
 # ----------------------------------------------------------------------------
 # 4. Initialize the dependencies for the LangGraph graph

@@ -6,13 +6,13 @@ import asyncio
 import operator
 import os
 from typing import Annotated, Sequence, TypedDict, Literal, Optional, List, Dict
-from dotenv import load_dotenv
+from env_config import load_env
 
 
 from langchain_community.document_loaders import AsyncHtmlLoader
 from langchain_community.vectorstores import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from llm_factory import get_chat_model, get_embeddings_model
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.managed.is_last_step import RemainingSteps
 from langchain_core.tools import tool
@@ -32,8 +32,8 @@ from langgraph.prebuilt import create_react_agent
 # Load environment variables
 # -----------------------------------------------------------------------------
 
-load_dotenv() #A
-#A load the environment variables from the .env 
+ENV = load_env() #A
+#A load environment variables from the project root .env file
 
 # -----------------------------------------------------------------------------
 # 1. Prepare knowledge base at startup
@@ -57,7 +57,7 @@ async def build_vectorstore(destinations: Sequence[str]) -> Chroma: #B
     chunks = sum([splitter.split_documents([d]) for d in docs], []) #D
 
     print(f"Embedding {len(chunks)} chunks ...") #E
-    vectordb_client = Chroma.from_documents(chunks, embedding=OpenAIEmbeddings()) #E
+    vectordb_client = Chroma.from_documents(chunks, embedding=get_embeddings_model()) #E
     print("Vector store ready.\n")
     return vectordb_client #F
 
@@ -68,8 +68,6 @@ _ti_vectorstore_client: Chroma | None = None #G
 def get_travel_info_vectorstore() -> Chroma: #H
     global _ti_vectorstore_client
     if _ti_vectorstore_client is None:
-        if not os.environ.get("OPENAI_API_KEY"):
-            raise RuntimeError("Set the OPENAI_API_KEY env variable and re-run.")
         _ti_vectorstore_client = asyncio.run(build_vectorstore(UK_DESTINATIONS))
     return _ti_vectorstore_client #I
 
@@ -155,9 +153,7 @@ async def main():
         await get_accuweather_tools() #B
     tools = [search_travel_info, 
         *accuweather_tools] #C
-    llm_model = ChatOpenAI( 
-        model="gpt-5-mini",
-        use_responses_api=True) #D
+    llm_model = get_chat_model(use_responses_api=True) #D
 
     travel_info_agent = create_react_agent( #E
         model=llm_model,

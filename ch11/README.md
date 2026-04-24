@@ -1,6 +1,6 @@
-# UK Travel Assistant – LangGraph (ToolNode pattern)
+# UK Travel Assistant – LangGraph
 
-This project is an example of the **"Add tools"** LangGraph tutorial [§4 Define the graph](https://langchain-ai.github.io/langgraph/tutorials/get-started/2-add-tools/#4-define-the-graph) applied to a travel assistant.
+This chapter builds a UK travel assistant with LangGraph. The examples progress from a basic tool-calling graph to multi-agent orchestration, hotel booking, MCP weather integration, and guardrails.
 
 The assistant can answer questions about WikiVoyage pages for:
 
@@ -9,7 +9,7 @@ The assistant can answer questions about WikiVoyage pages for:
 * South Cornwall
 * West Cornwall
 
-It relies on a **single tool** (`search_travel_info`) and the standard pre-built components `tools_condition` + custom `CustomToolNode`.
+The early examples use a single travel-search tool (`search_travel_info`) and the standard pre-built components `tools_condition` + custom `CustomToolNode`. Later examples add weather, hotel-booking tools, supervisor agents, MCP tools, and travel-only guardrails.
 
 ---
 
@@ -17,24 +17,34 @@ It relies on a **single tool** (`search_travel_info`) and the standard pre-built
 
 ```powershell
 # 1 · Virtual environment
-python -m venv env_ch12
-.\env_ch12\Scripts\Activate.ps1
+python -m venv env_ch11
+.\env_ch11\Scripts\Activate.ps1
 
 # 2 · Dependencies
 pip install -r requirements.txt
 
-# 3 · OpenAI key (session-only)
-$Env:OPENAI_API_KEY = "sk-..."
+# 3 · LLM provider settings (session-only)
+$Env:LLM_PROVIDER = "openai"   # openai, ollama, or gemini
+$Env:OPENAI_API_KEY = "sk-..." # required only for openai
 
-# 4 · Run
-python main.py
+# Optional provider-specific overrides:
+# $Env:OPENAI_MODEL = "gpt-5-nano"
+# $Env:OLLAMA_BASE_URL = "http://localhost:11434"
+# $Env:OLLAMA_MODEL = "gemma4:e2b"
+# $Env:GEMINI_API_KEY = "..."
+# $Env:GEMINI_MODEL = "gemini-flash-latest"
+
+# 4 · Run one of the chapter examples
+python main_01_01.py
 ```
 
 ---
 
 ### Internals
 
-* **Vector store:** Pages fetched with `AsyncHtmlLoader`, chunked and embedded with `OpenAIEmbeddings`, stored in **Chroma**.
+* **Environment:** `env_config.load_env()` loads the project-root `.env` file and applies shared defaults.
+* **Model factory:** `llm_factory.get_chat_model()` and `llm_factory.get_embeddings_model()` select OpenAI, Ollama, or Gemini from `LLM_PROVIDER`.
+* **Vector store:** Pages fetched with `AsyncHtmlLoader`, chunked and embedded with the configured embeddings provider, stored in **Chroma**.
 * **Tool:** `search_travel_info` performs similarity search and returns top chunks.
 * **LangGraph:**
   * `chatbot` node -> LLM (may emit tool_calls).
