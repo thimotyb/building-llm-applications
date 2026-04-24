@@ -10,6 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
+            "python": "${workspaceFolder}/ch11/env_ch11/bin/python"
         }
     ]
 }
