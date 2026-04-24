@@ -3,7 +3,7 @@ import asyncio
 from typing import Sequence
 from pathlib import Path
 from langchain_community.document_loaders import AsyncHtmlLoader
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from llm_factory import get_embeddings_model, load_env
 
