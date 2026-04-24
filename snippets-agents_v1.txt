@@ -1,0 +1,77 @@
+## Regole uso snippet
+pwd
+cd /home/thimoty/git/agents-course
+
+## M1 - Setup 0: Prerequisiti Ubuntu
+sudo apt update
+sudo apt install -y curl python3 python3-venv python3-pip zstd
+
+## M1 - Setup 1: Installazione Ollama locale
+curl -fsSL https://ollama.com/install.sh | sh
+ollama --version
+
+## M1 - Setup 2: Avvio servizio Ollama
+sudo systemctl enable ollama
+sudo systemctl start ollama
+sudo systemctl status ollama
+
+## M1 - Setup 3: Modello locale Gemma
+ollama pull gemma4:e4b
+ollama pull nomic-embed-text
+ollama list
+ollama run gemma4:e4b "Write one sentence about AI agents."
+
+## M1 - Setup 4: Ambiente Python (venv)
+git clone https://github.com/thimotyb/building-llm-applications.git
+cd building-llm-applications
+cd ch01
+python3 --version
+python3 -m venv env_ch01
+source env_ch01/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+pip list
+jupyter notebook
+
+======================
+.env file
+======================
+OPENAI_API_KEY=sk-proj-
+GEMINI_API_KEY=AQ.
+NVIDIA_API_KEY=nvapi-
+LLM_PROVIDER=ollama
+#LLM_PROVIDER=gemini
+OLLAMA_MODEL=gemma4:e2b
+GEMINI_MODEL=gemini-flash-latest
+OPENAI_MODEL=gpt-5-nano
+CH05_LOG_FILE=logs/ch05-research.log
+CH05_LOG_LLM_DUMPS=0
+CH05_LOG_FULL_STATE=0
+GEMINI_EMBEDDING_MODEL=gemini-embedding-2-preview
+LANGSMITH_API_KEY=lsv2_pt
+# Enables LangSmith tracing when set to true. The ch07 notebook also enables it automatically when LANGSMITH_API_KEY is present.
+LANGSMITH_TRACING=true
+# LangSmith API endpoint.
+LANGSMITH_ENDPOINT=https://api.smith.langchain.com
+# LangSmith project name where notebook traces are grouped.
+LANGSMITH_PROJECT=qachatbot
+
+=======================
+
+
+pip install ollama langchain langchain-ollama python-dotenv
+
+## M1 - Esercizio 1.1: Configurazione variabili
+touch .env
+echo OLLAMA_HOST=http://127.0.0.1:11434 >> .env
+cat .env
+
+## M1 - Esercizio 2: Avvio rapido script
+mkdir -p labs/m1
+touch labs/m1/main.py
+python labs/m1/main.py
+
+## Utility lezione
+ls -la
+git status
+deactivate
