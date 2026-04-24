@@ -1,0 +1,10 @@
+services:
+  chroma-admin:
+    image: fengzhichao/chromadb-admin:latest
+    ports:
+      - "3001:3001"
+    environment:
+      - CHROMA_SERVER_HOST=host.docker.internal
+      - CHROMA_SERVER_HTTP_PORT=8001
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
