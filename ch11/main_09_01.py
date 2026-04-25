@@ -281,12 +281,15 @@ hotel_db_toolkit_tools = hotel_db_toolkit.get_tools()
 def patch_db_tool(tool):
     original_invoke = tool.invoke
     def patched_invoke(input, config=None, **kwargs):
+        def get_val(inp, key):
+            if isinstance(inp, dict): return inp.get(key, inp)
+            if hasattr(inp, key): return getattr(inp, key)
+            return inp
+
         if tool.name == "sql_db_query":
-            query = input.get("query") if isinstance(input, dict) else input
-            print(f"🗄️  [database:query] {query}")
+            print(f"🗄️  [database:query] {get_val(input, 'query')}")
         elif tool.name == "sql_db_schema":
-            tables = input.get("table_names") if isinstance(input, dict) else input
-            print(f"🗄️  [database:schema] {tables}")
+            print(f"🗄️  [database:schema] {get_val(input, 'table_names')}")
         else:
             print(f"🗄️  [database:tool] {tool.name}")
         return original_invoke(input, config=config, **kwargs)
