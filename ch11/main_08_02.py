@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 
 from llm_factory import get_chat_model
 from vectorstore_manager import get_travel_info_vectorstore
-from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langgraph.managed.is_last_step import RemainingSteps
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
@@ -121,8 +121,8 @@ class AgentState(TypedDict): #A
 # AgentType Enum and Structured Output Model
 # -----------------------------------------------------------------------------
 class AgentType(str, Enum):
-    travel_info_agent = "travel_info_agent"
-    accommodation_booking_agent = "accommodation_booking_agent"
+    travel_info_node = "travel_info_node"
+    accommodation_booking_node = "accommodation_booking_node"
 
 class AgentTypeOutput(BaseModel): 
     agent: AgentType = Field(..., description="Which agent should handle the query?")
@@ -136,8 +136,8 @@ llm_router = llm_model.with_structured_output(AgentTypeOutput)
 ROUTER_SYSTEM_PROMPT = (
     "You are a router. Given the following user message, decide if it is a travel information question (about destinations, attractions, or general travel info) "
     "or an accommodation booking question (about hotels, BnBs, room availability, or prices).\n"
-    "If it is a travel information question, respond with 'travel_info_agent'.\n"
-    "If it is an accommodation booking question, respond with 'accommodation_booking_agent'."
+    "If it is a travel information question, respond with 'travel_info_node'.\n"
+    "If it is an accommodation booking question, respond with 'accommodation_booking_node'."
 )
 
 # -----------------------------------------------------------------------------
@@ -159,7 +159,7 @@ def router_agent_node(state: AgentState) -> Command[AgentType]:
         print(f"🔀 [router_agent] → selected agent: {agent_name}")
         return Command(update=state, goto=agent_name) #H
     
-    return Command(update=state, goto=AgentType.travel_info_agent) #I
+    return Command(update=state, goto=AgentType.travel_info_node) #I
 
 #A Get the messages from the state
 #B Get the last message from the messages list
@@ -183,7 +183,12 @@ travel_info_agent = create_react_agent(
     model=llm_model,
     tools=TOOLS,
     state_schema=AgentState,
-    prompt="You are a helpful assistant that can search travel information and get the weather forecast. Only use the tools to find the information you need (including town names).",
+    prompt="""You are a helpful assistant that can search
+    travel information and get the weather forecast.
+    Only use the tools to find destination information,
+    town names, and weather. Do not search for hotel,
+    BnB, accommodation availability, room availability,
+    or prices.""",
 )
 
 
@@ -336,7 +341,13 @@ accommodation_booking_agent = create_react_agent( #B
     model=llm_model,
     tools=BOOKING_TOOLS,
     state_schema=AgentState,
-    prompt="You are a helpful assistant that can check hotel and BnB room availability and price for a destination in Cornwall. You can use the tools to get the information you need. If the users does not specify the accommodation type, you should check both hotels and BnBs.",
+    prompt="""You are a helpful assistant that can check hotel
+    and BnB room availability and price for a destination in
+    Cornwall. You can use the tools to get the information you
+    need. If the users does not specify the accommodation type,
+    you should check both hotels and BnBs. If a previous message
+    has already recommended a town, use that town for availability
+    and pricing instead of choosing a different destination.""",
 )
 
 #A Define the booking tools, which are the tools from the hotel database toolkit and the BnB availability tool
@@ -359,13 +370,13 @@ def accommodation_booking_node(state: AgentState):
 # -----------------------------------------------------------------------------
 graph = StateGraph(AgentState) #A
 graph.add_node("router_agent", router_agent_node) #B
-graph.add_node("travel_info_agent", 
+graph.add_node("travel_info_node", 
     travel_info_node) #C
-graph.add_node("accommodation_booking_agent", 
+graph.add_node("accommodation_booking_node", 
     accommodation_booking_node) #D
 
-graph.add_edge("travel_info_agent", END) #E
-graph.add_edge("accommodation_booking_agent", END) #F
+graph.add_edge("travel_info_node", END) #E
+graph.add_edge("accommodation_booking_node", END) #F
 
 graph.set_entry_point("router_agent") #G
 
@@ -386,6 +397,30 @@ travel_assistant = graph.compile(checkpointer=checkpointer) #I
 # 5. Simple CLI interface
 # ----------------------------------------------------------------------------
 
+def message_content_to_text(message: BaseMessage) -> str:
+    content = message.content
+    if isinstance(content, str):
+        return content.strip()
+    if isinstance(content, list):
+        parts = []
+        for part in content:
+            if isinstance(part, str):
+                parts.append(part)
+            elif isinstance(part, dict):
+                text = part.get("text") or part.get("content")
+                if text:
+                    parts.append(str(text))
+        return "\n".join(parts).strip()
+    return str(content).strip() if content else ""
+
+def get_last_ai_response(messages: Sequence[BaseMessage]) -> str:
+    for message in reversed(messages):
+        if isinstance(message, AIMessage):
+            text = message_content_to_text(message)
+            if text:
+                return text
+    return ""
+
 def chat_loop(): 
     thread_id=uuid.uuid1() #A
     print(f'Thread ID: {thread_id}') 
@@ -398,9 +433,9 @@ def chat_loop():
         [HumanMessage(content=user_input)]} #D
     result = travel_assistant.invoke(
         question, config=config) #E
-    response_msg = result["messages"][-1] #F
+    response_text = get_last_ai_response(result["messages"]) #F
     print(
-       f"Assistant: {response_msg.content}\n") #G
+       f"Assistant: {response_text}\n") #G
 
     state_history = travel_assistant.get_state_history(
         config) #H
@@ -431,10 +466,10 @@ def chat_loop():
         content="What is the weather in the same town?")]}
     result = travel_assistant.invoke(new_question, 
         config=new_config) #Q
-    response_msg = result["messages"][-1] #R
+    response_text = get_last_ai_response(result["messages"]) #R
 
     print(
-       f"Assistant: {response_msg.content}\n") #S
+       f"Assistant: {response_text}\n") #S
 
 #A Create a unique thread id
 #B Create a config with the thread id

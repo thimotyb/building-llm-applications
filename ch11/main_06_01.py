@@ -12,7 +12,7 @@ import random
 
 from llm_factory import get_chat_model, get_embeddings_model
 from vectorstore_manager import get_travel_info_vectorstore
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langgraph.managed.is_last_step import RemainingSteps
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
@@ -112,6 +112,16 @@ class AgentState(TypedDict): #A
 #A Define the agent state
 #B this is a special type of state that contains the remaining steps of the agent
 
+def add_agent_entry_log(agent, label: str):
+    original_invoke = agent.invoke
+
+    def logged_invoke(input, config=None, **kwargs):
+        print(f"{label} node entered")
+        return original_invoke(input, config=config, **kwargs)
+
+    object.__setattr__(agent, "invoke", logged_invoke)
+    return agent
+
 # ----------------------------------------------------------------------------
 # Build the travel info assistant React Agent
 # ----------------------------------------------------------------------------
@@ -121,10 +131,16 @@ travel_info_agent = create_react_agent(
     tools=TOOLS,
     state_schema=AgentState,
     name="travel_info_agent",
-    prompt="""You are a helpful assistant that can search 
-    travel information and get the weather forecast. 
-    Only use the tools to find the information you 
-    need (including town names).""",
+    prompt="""You are a helpful assistant that can search
+    travel information and get the weather forecast.
+    Only use the tools to find destination information,
+    town names, and weather. Do not search for hotel,
+    BnB, accommodation availability, room availability,
+    or prices. If the user asks for both destination
+    information and accommodation, choose the best town
+    using travel information and weather, then stop with
+    a concise recommendation; the accommodation booking
+    agent handles availability and prices.""",
 )
 
 
@@ -285,20 +301,18 @@ accommodation_booking_agent = create_react_agent( #B
     destination in Cornwall. You can use the tools 
     to get the information you need. If the users 
     does not specify the accommodation type, you 
-    should check both hotels and BnBs.""",
+    should check both hotels and BnBs. If another
+    agent has already recommended a town, use that
+    town for availability and pricing instead of
+    choosing a different destination.""",
 )
 
-# -----------------------------------------------------------------------------
-# Agent nodes for the supervisor (to add logging)
-# -----------------------------------------------------------------------------
-
-def travel_info_node(state: AgentState):
-    print(f"🤖 [travel_info_agent] node entered")
-    return travel_info_agent.invoke(state)
-
-def accommodation_booking_node(state: AgentState):
-    print(f"🏨 [accommodation_booking_agent] node entered")
-    return accommodation_booking_agent.invoke(state)
+travel_info_agent = add_agent_entry_log(
+    travel_info_agent, "🤖 [travel_info_agent]"
+)
+accommodation_booking_agent = add_agent_entry_log(
+    accommodation_booking_agent, "🏨 [accommodation_booking_agent]"
+)
 
 # ----------------------------------------------------------------------------
 # Supervisor
@@ -308,8 +322,8 @@ def accommodation_booking_node(state: AgentState):
 # Travel Assistant Supervisor (Multi-Agent)
 # -----------------------------------------------------------------------------
 travel_assistant = create_supervisor( #A
-    agents=[travel_info_node, 
-        accommodation_booking_node], #B
+    agents=[travel_info_agent,
+        accommodation_booking_agent], #B
     model=get_chat_model(use_responses_api=True), #C
     supervisor_name="travel_assistant",
     prompt=( #D
@@ -317,9 +331,17 @@ travel_assistant = create_supervisor( #A
         a travel information agent and an accommodation booking agent. """
         """You can answer user questions that might require 
         calling both agents when needed. """
-        """Decide which agent(s) to use for each user request 
-        and coordinate their responses."""
-    )
+        """For mixed requests about destination choice, weather, 
+        and accommodation availability or prices, first call the 
+        travel information agent only to identify the best town 
+        and current weather, then call the accommodation booking 
+        agent for availability and prices in that town. Do not ask 
+        the travel information agent to search for accommodation, 
+        room availability, or prices. Decide which agent(s) to use 
+        for each user request and coordinate their responses."""
+    ),
+    add_handoff_back_messages=False,
+    include_agent_name="inline",
 ).compile() #E
 
 #A Create the supervisor
@@ -332,6 +354,30 @@ travel_assistant = create_supervisor( #A
 # Simple CLI interface
 # ----------------------------------------------------------------------------
 
+def message_content_to_text(message: BaseMessage) -> str:
+    content = message.content
+    if isinstance(content, str):
+        return content.strip()
+    if isinstance(content, list):
+        parts = []
+        for part in content:
+            if isinstance(part, str):
+                parts.append(part)
+            elif isinstance(part, dict):
+                text = part.get("text") or part.get("content")
+                if text:
+                    parts.append(str(text))
+        return "\n".join(parts).strip()
+    return str(content).strip() if content else ""
+
+def get_last_ai_response(messages: Sequence[BaseMessage]) -> str:
+    for message in reversed(messages):
+        if isinstance(message, AIMessage):
+            text = message_content_to_text(message)
+            if text:
+                return text
+    return ""
+
 def chat_loop(): #A
     print("UK Travel Assistant (type 'exit' to quit)")
     while True:
@@ -340,8 +386,8 @@ def chat_loop(): #A
             break
         state = {"messages": [HumanMessage(content=user_input)]} #D
         result = travel_assistant.invoke(state) #E
-        response_msg = result["messages"][-1] #F
-        print(f"Assistant: {response_msg.content}\n") #G
+        response_text = get_last_ai_response(result["messages"]) #F
+        print(f"Assistant: {response_text}\n") #G
 
 #A Define the chat loop
 #B Get the user input

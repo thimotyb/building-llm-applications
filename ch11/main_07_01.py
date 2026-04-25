@@ -11,7 +11,7 @@ from env_config import load_env
 
 from llm_factory import get_chat_model, get_embeddings_model
 from vectorstore_manager import get_travel_info_vectorstore
-from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langgraph.managed.is_last_step import RemainingSteps
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
@@ -108,9 +108,9 @@ async def chat_loop(agent): #A
         state = {"messages": [HumanMessage(
             content=user_input)]} #E
         result = await agent.ainvoke(state) #F
-        response_msg = result["messages"][-1] #G
+        response_text = get_last_ai_response(result["messages"]) #G
         print(
-           f"Assistant: {response_msg.content}\n") #H
+           f"Assistant: {response_text}\n") #H
 
 #A Define the chat loop as an async function
 #B Start the chat loop
@@ -120,6 +120,30 @@ async def chat_loop(agent): #A
 #F Invoke the agent with the initial state, asyncronously
 #G Get the last message from the result, which contains the final answer
 #H Print the assistant's final answer, from the content of the last message
+
+def message_content_to_text(message: BaseMessage) -> str:
+    content = message.content
+    if isinstance(content, str):
+        return content.strip()
+    if isinstance(content, list):
+        parts = []
+        for part in content:
+            if isinstance(part, str):
+                parts.append(part)
+            elif isinstance(part, dict):
+                text = part.get("text") or part.get("content")
+                if text:
+                    parts.append(str(text))
+        return "\n".join(parts).strip()
+    return str(content).strip() if content else ""
+
+def get_last_ai_response(messages: Sequence[BaseMessage]) -> str:
+    for message in reversed(messages):
+        if isinstance(message, AIMessage):
+            text = message_content_to_text(message)
+            if text:
+                return text
+    return ""
 
 class AgentState(TypedDict): #A
     messages: Annotated[Sequence[BaseMessage], operator.add]
@@ -139,8 +163,9 @@ async def main():
         name="travel_info_agent",
         prompt="""You are a helpful assistant that can 
         search travel information and get the weather forecast. 
-        Only use the tools to find the information you need 
-        (including town names).""",
+        Only use the tools to find destination information, town
+        names, and weather. Do not search for hotel, BnB,
+        accommodation availability, room availability, or prices.""",
     )
     await chat_loop(travel_info_agent) #F
 

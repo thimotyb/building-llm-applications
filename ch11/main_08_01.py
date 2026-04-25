@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 
 from llm_factory import get_chat_model
 from vectorstore_manager import get_travel_info_vectorstore
-from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langgraph.managed.is_last_step import RemainingSteps
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
@@ -182,7 +182,12 @@ travel_info_agent = create_react_agent(
     model=llm_model,
     tools=TOOLS,
     state_schema=AgentState,
-    prompt="You are a helpful assistant that can search travel information and get the weather forecast. Only use the tools to find the information you need (including town names).",
+    prompt="""You are a helpful assistant that can search
+    travel information and get the weather forecast.
+    Only use the tools to find destination information,
+    town names, and weather. Do not search for hotel,
+    BnB, accommodation availability, room availability,
+    or prices.""",
 )
 
 
@@ -335,7 +340,13 @@ accommodation_booking_agent = create_react_agent( #B
     model=llm_model,
     tools=BOOKING_TOOLS,
     state_schema=AgentState,
-    prompt="You are a helpful assistant that can check hotel and BnB room availability and price for a destination in Cornwall. You can use the tools to get the information you need. If the users does not specify the accommodation type, you should check both hotels and BnBs.",
+    prompt="""You are a helpful assistant that can check hotel
+    and BnB room availability and price for a destination in
+    Cornwall. You can use the tools to get the information you
+    need. If the users does not specify the accommodation type,
+    you should check both hotels and BnBs. If a previous message
+    has already recommended a town, use that town for availability
+    and pricing instead of choosing a different destination.""",
 )
 
 #A Define the booking tools, which are the tools from the hotel database toolkit and the BnB availability tool
@@ -386,6 +397,30 @@ travel_assistant = graph.compile(
 # 5. Simple CLI interface
 # ----------------------------------------------------------------------------
 
+def message_content_to_text(message: BaseMessage) -> str:
+    content = message.content
+    if isinstance(content, str):
+        return content.strip()
+    if isinstance(content, list):
+        parts = []
+        for part in content:
+            if isinstance(part, str):
+                parts.append(part)
+            elif isinstance(part, dict):
+                text = part.get("text") or part.get("content")
+                if text:
+                    parts.append(str(text))
+        return "\n".join(parts).strip()
+    return str(content).strip() if content else ""
+
+def get_last_ai_response(messages: Sequence[BaseMessage]) -> str:
+    for message in reversed(messages):
+        if isinstance(message, AIMessage):
+            text = message_content_to_text(message)
+            if text:
+                return text
+    return ""
+
 def chat_loop(): #A
     thread_id=uuid.uuid1() #B
     print(f'Thread ID: {thread_id}') 
@@ -401,9 +436,9 @@ def chat_loop(): #A
             [HumanMessage(content=user_input)]} #E
         result = travel_assistant.invoke(state, 
             config=config) #F
-        response_msg = result["messages"][-1] #G
+        response_text = get_last_ai_response(result["messages"]) #G
         print(
-           f"Assistant: {response_msg.content}\n") #H
+           f"Assistant: {response_text}\n") #H
 
 
 #A Define the chat loop

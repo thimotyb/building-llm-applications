@@ -120,8 +120,8 @@ class AgentState(TypedDict): #A
 # AgentType Enum and Structured Output Model
 # -----------------------------------------------------------------------------
 class AgentType(str, Enum):
-    travel_info_agent = "travel_info_agent"
-    accommodation_booking_agent = "accommodation_booking_agent"
+    travel_info_node = "travel_info_node"
+    accommodation_booking_node = "accommodation_booking_node"
 
 class AgentTypeOutput(BaseModel): 
     agent: AgentType = Field(..., description="Which agent should handle the query?")
@@ -214,8 +214,8 @@ def pre_model_guardrail(state: dict):
 ROUTER_SYSTEM_PROMPT = (
     "You are a router. Given the following user message, decide if it is a travel information question (about destinations, attractions, or general travel info) "
     "or an accommodation booking question (about hotels, BnBs, room availability, or prices).\n"
-    "If it is a travel information question, respond with 'travel_info_agent'.\n"
-    "If it is an accommodation booking question, respond with 'accommodation_booking_agent'."
+    "If it is a travel information question, respond with 'travel_info_node'.\n"
+    "If it is an accommodation booking question, respond with 'accommodation_booking_node'."
 )
 
 # -----------------------------------------------------------------------------
@@ -256,7 +256,7 @@ def router_agent_node(state: AgentState) -> Command[AgentType]:
         print(f"🔀 [router_agent] → selected agent: {agent_name}")
         return Command(update=state, goto=agent_name) 
     
-    return Command(update=state, goto=AgentType.travel_info_agent) 
+    return Command(update=state, goto=AgentType.travel_info_node) 
 
 #A Define the guardrail decision prompt
 #B Invoke the guardrail model, which returns a GuardrailDecision object
@@ -278,7 +278,9 @@ travel_info_agent = create_react_agent(
     state_schema=AgentState,
     prompt="""You are a helpful assistant that can search travel 
     information and get the weather forecast. Only use the tools 
-    to find the information you need (including town names).""",
+    to find destination information, town names, and weather. Do 
+    not search for hotel, BnB, accommodation availability, room 
+    availability, or prices.""",
     pre_model_hook=pre_model_guardrail, #A
 )
 #A Guardrail to check if the user input is travel-related and focusing on Cornwall (England)
@@ -438,7 +440,9 @@ accommodation_booking_agent = create_react_agent( #A
     and BnB room availability and price for a destination in 
     Cornwall. You can use the tools to get the information you 
     need. If the users does not specify the accommodation type,
-    you should check both hotels and BnBs.""",
+    you should check both hotels and BnBs. If a previous message
+    has already recommended a town, use that town for availability
+    and pricing instead of choosing a different destination.""",
     pre_model_hook=pre_model_guardrail,
 )
 
@@ -468,14 +472,14 @@ def guardrail_refusal_node(state: AgentState): #A
 
 graph = StateGraph(AgentState) 
 graph.add_node("router_agent", router_agent_node) 
-graph.add_node("travel_info_agent", 
+graph.add_node("travel_info_node", 
     travel_info_node) 
-graph.add_node("accommodation_booking_agent", 
+graph.add_node("accommodation_booking_node", 
     accommodation_booking_node) 
 graph.add_node("guardrail_refusal", guardrail_refusal_node) #B
 
-graph.add_edge("travel_info_agent", END) 
-graph.add_edge("accommodation_booking_agent", END) 
+graph.add_edge("travel_info_node", END) 
+graph.add_edge("accommodation_booking_node", END) 
 graph.add_edge("guardrail_refusal", END) #C
 
 graph.set_entry_point("router_agent") 
@@ -492,6 +496,30 @@ travel_assistant = graph.compile(checkpointer=checkpointer)
 # 5. Simple CLI interface
 # ----------------------------------------------------------------------------
 
+def message_content_to_text(message: BaseMessage) -> str:
+    content = message.content
+    if isinstance(content, str):
+        return content.strip()
+    if isinstance(content, list):
+        parts = []
+        for part in content:
+            if isinstance(part, str):
+                parts.append(part)
+            elif isinstance(part, dict):
+                text = part.get("text") or part.get("content")
+                if text:
+                    parts.append(str(text))
+        return "\n".join(parts).strip()
+    return str(content).strip() if content else ""
+
+def get_last_ai_response(messages: Sequence[BaseMessage]) -> str:
+    for message in reversed(messages):
+        if isinstance(message, AIMessage):
+            text = message_content_to_text(message)
+            if text:
+                return text
+    return ""
+
 def chat_loop(): #A
     thread_id=uuid.uuid1() #B
     print(f'Thread ID: {thread_id}') 
@@ -504,8 +532,8 @@ def chat_loop(): #A
             break
         state = {"messages": [HumanMessage(content=user_input)]} #E
         result = travel_assistant.invoke(state, config=config) #F
-        response_msg = result["messages"][-1] #G
-        print(f"Assistant: {response_msg.content}\n") #H
+        response_text = get_last_ai_response(result["messages"]) #G
+        print(f"Assistant: {response_text}\n") #H
 
 
 #A Define the chat loop
