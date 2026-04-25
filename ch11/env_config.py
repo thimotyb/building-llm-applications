@@ -1,7 +1,11 @@
 import os
+import warnings
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
+# Silenzia i warning di deprecazione di LangGraph per mantenere l'output pulito durante il corso
+warnings.filterwarnings("ignore", message=".*create_react_agent has been moved to.*")
+warnings.filterwarnings("ignore", message=".*create_react_agent is deprecated.*")
 
 @dataclass(frozen=True)
 class EnvSettings:

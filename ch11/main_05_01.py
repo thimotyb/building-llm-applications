@@ -150,6 +150,7 @@ def router_agent_node(state: AgentState) -> Command[AgentType]:
     last_msg = messages[-1] if messages else None #B
     if isinstance(last_msg, HumanMessage): #C
         user_input = last_msg.content #D
+        print(f"🧠 [router_agent] Routing query: '{user_input[:50]}...'")
         router_messages = [ #E
             SystemMessage(content=ROUTER_SYSTEM_PROMPT),
             HumanMessage(content=user_input)
@@ -157,6 +158,7 @@ def router_agent_node(state: AgentState) -> Command[AgentType]:
         router_response = llm_router.invoke(
             router_messages) #F
         agent_name = router_response.agent.value #G
+        print(f"🔀 [router_agent] → selected agent: {agent_name}")
         return Command(update=state, 
             goto=agent_name) #H
     
@@ -218,6 +220,24 @@ class WeatherForecastService:
 hotel_db = SQLDatabase.from_uri("sqlite:///hotel_db/cornwall_hotels.db")
 hotel_db_toolkit = SQLDatabaseToolkit(db=hotel_db, llm=llm_model)
 hotel_db_toolkit_tools = hotel_db_toolkit.get_tools()
+
+# Add logging to database tools
+def patch_db_tool(tool):
+    original_invoke = tool.invoke
+    def patched_invoke(input, config=None, **kwargs):
+        if tool.name == "sql_db_query":
+            query = input.get("query") if isinstance(input, dict) else input
+            print(f"🗄️  [database:query] {query}")
+        elif tool.name == "sql_db_schema":
+            tables = input.get("table_names") if isinstance(input, dict) else input
+            print(f"🗄️  [database:schema] {tables}")
+        else:
+            print(f"🗄️  [database:tool] {tool.name}")
+        return original_invoke(input, config=config, **kwargs)
+    object.__setattr__(tool, 'invoke', patched_invoke)
+    return tool
+
+hotel_db_toolkit_tools = [patch_db_tool(t) for t in hotel_db_toolkit_tools]
 
 # -----------------------------------------------------------------------------
 # BnBBookingService (Mock REST API client)
@@ -296,9 +316,12 @@ class BnBBookingService: #B
 @tool(description="Check BnB room availability and price for a destination in Cornwall.") #A
 def check_bnb_availability(destination: str, num_rooms: int) -> List[Dict]: #B
     """Check BnB room availability and price for the requested destination and number of rooms."""
+    print(f"🏠 [check_bnb_availability] destination='{destination}', rooms={num_rooms}")
     offers = BnBBookingService.get_offers_near_town(destination, num_rooms)
     if not offers:
+        print(f"📄 [check_bnb_availability] → No offers found")
         return [{"error": f"No available BnBs found in {destination} for {num_rooms} rooms."}]
+    print(f"📄 [check_bnb_availability] → {len(offers)} offers found")
     return offers
 
 
@@ -317,8 +340,17 @@ accommodation_booking_agent = create_react_agent( #B
     prompt="You are a helpful assistant that can check hotel and BnB room availability and price for a destination in Cornwall. You can use the tools to get the information you need. If the users does not specify the accommodation type, you should check both hotels and BnBs.",
 )
 
-#A Define the booking tools, which are the tools from the hotel database toolkit and the BnB availability tool
-#B Create the accommodation booking agent
+# -----------------------------------------------------------------------------
+# Agent nodes for the graph (to add logging)
+# -----------------------------------------------------------------------------
+
+def travel_info_node(state: AgentState):
+    print(f"🤖 [travel_info_agent] node entered")
+    return travel_info_agent.invoke(state)
+
+def accommodation_booking_node(state: AgentState):
+    print(f"🏨 [accommodation_booking_agent] node entered")
+    return accommodation_booking_agent.invoke(state)
 
 # -----------------------------------------------------------------------------
 # Build the LangGraph graph with router, travel_info_agent, and accommodation_booking_agent
@@ -326,9 +358,9 @@ accommodation_booking_agent = create_react_agent( #B
 graph = StateGraph(AgentState) #A
 graph.add_node("router_agent", router_agent_node) #B
 graph.add_node("travel_info_agent", 
-    travel_info_agent) #C
+    travel_info_node) #C
 graph.add_node("accommodation_booking_agent", 
-    accommodation_booking_agent) #D
+    accommodation_booking_node) #D
 
 graph.add_edge("travel_info_agent", END) #E
 graph.add_edge("accommodation_booking_agent", END) #F

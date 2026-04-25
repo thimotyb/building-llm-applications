@@ -175,6 +175,24 @@ hotel_db = SQLDatabase.from_uri("sqlite:///hotel_db/cornwall_hotels.db")
 hotel_db_toolkit = SQLDatabaseToolkit(db=hotel_db, llm=llm_model)
 hotel_db_toolkit_tools = hotel_db_toolkit.get_tools()
 
+# Add logging to database tools
+def patch_db_tool(tool):
+    original_invoke = tool.invoke
+    def patched_invoke(input, config=None, **kwargs):
+        if tool.name == "sql_db_query":
+            query = input.get("query") if isinstance(input, dict) else input
+            print(f"🗄️  [database:query] {query}")
+        elif tool.name == "sql_db_schema":
+            tables = input.get("table_names") if isinstance(input, dict) else input
+            print(f"🗄️  [database:schema] {tables}")
+        else:
+            print(f"🗄️  [database:tool] {tool.name}")
+        return original_invoke(input, config=config, **kwargs)
+    object.__setattr__(tool, 'invoke', patched_invoke)
+    return tool
+
+hotel_db_toolkit_tools = [patch_db_tool(t) for t in hotel_db_toolkit_tools]
+
 # -----------------------------------------------------------------------------
 # BnBBookingService (Mock REST API client)
 # -----------------------------------------------------------------------------
@@ -287,11 +305,13 @@ class BnBBookingService: #B
 price for a destination in Cornwall.""") #A
 def check_bnb_availability(destination: str, num_rooms: int) \
     -> List[Dict]: #B
-
+    print(f"🏠 [check_bnb_availability] destination='{destination}', rooms={num_rooms}")
     offers = BnBBookingService.get_offers_near_town(
         destination, num_rooms)
     if not offers:
+        print(f"📄 [check_bnb_availability] → No offers found")
         return [{"error": f"No available BnBs found in {destination} for {num_rooms} rooms."}]
+    print(f"📄 [check_bnb_availability] → {len(offers)} offers found")
     return offers
 
 

@@ -34,6 +34,14 @@ async def build_vectorstore(destinations: Sequence[str]) -> Chroma:
     print("🌐 Downloading destination pages ...")
     docs = await loader.aload()
 
+    # Pulizia: rimuoviamo stringhe Base64 e dati binari che sporcano l'output
+    import re
+    for doc in docs:
+        # Rimuove stringhe base64 lunghe (spesso immagini o icone)
+        doc.page_content = re.sub(r'data:image/[^;]+;base64,[^"\'\s]+', '[image]', doc.page_content)
+        # Rimuove stringhe che sembrano base64 molto lunghe (>100 caratteri)
+        doc.page_content = re.sub(r'[A-Za-z0-9+/]{100,}', '[data]', doc.page_content)
+
     splitter = RecursiveCharacterTextSplitter(chunk_size=1024, chunk_overlap=128)
     chunks = sum([splitter.split_documents([d]) for d in docs], [])
 
