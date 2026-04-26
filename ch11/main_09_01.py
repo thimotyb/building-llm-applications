@@ -200,8 +200,12 @@ def router_agent_node(state: AgentState) -> Command[AgentType]:
             SystemMessage(content=GUARDRAIL_SYSTEM_PROMPT),
             HumanMessage(content=user_input),
         ]
+        print(f"🛡️  [guardrail:router] checking query: '{user_input[:50]}...'")
         decision = llm_guardrail.invoke(
             classifier_messages) #A
+        print(
+            f"🛡️  [guardrail:router] → is_travel={decision.is_travel}, reason='{decision.reason}'"
+        )
         if not decision.is_travel: #B
             # Return refusal directly as an AI message and shortcut to END via a dedicated node
             refusal_text = ( #C
@@ -433,6 +437,7 @@ def accommodation_booking_node(state: AgentState):
 # Guardrail refusal node (no-op, used to shortcut to END)
 # -----------------------------------------------------------------------------
 def guardrail_refusal_node(state: AgentState): #A
+    print("🛑 [guardrail_refusal] node reached")
     return {}
 
 graph = StateGraph(AgentState) 

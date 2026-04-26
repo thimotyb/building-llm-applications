@@ -188,17 +188,22 @@ def pre_model_guardrail(state: dict):
         return {}
 
     user_input = last_msg.content
+    print(f"🛡️  [guardrail:agent] checking query: '{user_input[:50]}...'")
     classifier_messages = [ #B
         SystemMessage(content=AGENT_GUARDRAIL_SYSTEM_PROMPT),
         HumanMessage(content=user_input),
     ]
     decision = llm_guardrail.invoke(classifier_messages)
+    print(
+        f"🛡️  [guardrail:agent] → is_travel={decision.is_travel}, reason='{decision.reason}'"
+    )
 
     if decision.is_travel: #C
         # Allow normal flow; do not modify inputs
         return {}
 
     # Inject a refusal instruction ahead of the original messages so the model politely declines
+    print("🛡️  [guardrail:agent] injecting refusal instruction")
     return {"llm_input_messages": 
         [SystemMessage(content=AGENT_REFUSAL_INSTRUCTION),
         *messages]} #D
@@ -234,7 +239,11 @@ def router_agent_node(state: AgentState) -> Command[AgentType]:
             SystemMessage(content=GUARDRAIL_SYSTEM_PROMPT), #A
             HumanMessage(content=user_input),
         ]
+        print(f"🛡️  [guardrail:router] checking query: '{user_input[:50]}...'")
         decision = llm_guardrail.invoke(classifier_messages) #B
+        print(
+            f"🛡️  [guardrail:router] → is_travel={decision.is_travel}, reason='{decision.reason}'"
+        )
         if not decision.is_travel: #C
             # Return refusal directly as an AI message and shortcut to END via a dedicated node
             refusal_text = ( #D
@@ -468,6 +477,7 @@ def accommodation_booking_node(state: AgentState):
 # Guardrail refusal node (no-op, used to shortcut to END)
 # -----------------------------------------------------------------------------
 def guardrail_refusal_node(state: AgentState): #A
+    print("🛑 [guardrail_refusal] node reached")
     return {}
 
 graph = StateGraph(AgentState) 

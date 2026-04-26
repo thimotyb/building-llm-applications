@@ -421,6 +421,11 @@ def get_last_ai_response(messages: Sequence[BaseMessage]) -> str:
                 return text
     return ""
 
+def log_memory_state_message(message: HumanMessage, thread_id) -> None:
+    content = str(message.content)
+    preview = content if len(content) <= 120 else f"{content[:120]}..."
+    print(f"💾 [memory:{thread_id}] adding latest user message to state: {preview}")
+
 def chat_loop(): #A
     thread_id=uuid.uuid1() #B
     print(f'Thread ID: {thread_id}') 
@@ -432,8 +437,10 @@ def chat_loop(): #A
         user_input = input("You: ").strip() #C
         if user_input.lower() in {"exit", "quit"}: #D
             break
+        latest_message = HumanMessage(content=user_input)
+        log_memory_state_message(latest_message, thread_id)
         state = {"messages": 
-            [HumanMessage(content=user_input)]} #E
+            [latest_message]} #E
         result = travel_assistant.invoke(state, 
             config=config) #F
         response_text = get_last_ai_response(result["messages"]) #G
