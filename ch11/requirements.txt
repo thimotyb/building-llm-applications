@@ -13,4 +13,5 @@ html2text==2025.4.15
 langgraph-supervisor==0.0.30
 fastmcp==2.10.5
 langchain-mcp-adapters==0.1.12
+pydantic<2.13
 lxml==5.4.0

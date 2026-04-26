@@ -84,6 +84,19 @@ def search_travel_info(query: str) -> str: #B
 # 3. Configure LLM with tool awareness
 # ----------------------------------------------------------------------------
 
+MCP_TOOL_NAMES = set()
+
+def log_mcp_tool_decisions(state: dict) -> dict:
+    last_msg = state["messages"][-1] if state.get("messages") else None
+    if not isinstance(last_msg, AIMessage):
+        return {}
+
+    for tool_call in last_msg.tool_calls:
+        tool_name = tool_call.get("name")
+        if tool_name in MCP_TOOL_NAMES:
+            print(f"🌐 [mcp:{tool_name}] selected args={tool_call.get('args')}")
+    return {}
+
 async def get_accuweather_tools(): #A
     mcp_client = MultiServerMCPClient({ #B
         "accuweather": { #C
@@ -91,12 +104,16 @@ async def get_accuweather_tools(): #A
             "transport": "streamable_http"
         }
     })
-    return await mcp_client.get_tools() #D
+    tools = await mcp_client.get_tools() #D
+    MCP_TOOL_NAMES.update(tool.name for tool in tools) #E
+    return tools #F
 
 #A Define the function to get the AccuWeather tools as an async function
 #B Instantiate the MultiServerMCPClient
 #C Register the AccuWeather MCP server
 #D Return the AccuWeather tools exposed by the MCP server
+#E Track MCP tool names so LLM tool-call decisions can be logged
+#F Return the MCP tools unchanged
 
 
 async def chat_loop(agent): #A
@@ -161,6 +178,7 @@ async def main():
         tools=tools,
         state_schema=AgentState,
         name="travel_info_agent",
+        post_model_hook=log_mcp_tool_decisions,
         prompt="""You are a helpful assistant that can 
         search travel information and get the weather forecast. 
         Only use the tools to find destination information, town
