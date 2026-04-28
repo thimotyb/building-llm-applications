@@ -11,6 +11,11 @@ nvm install node
 nvm use node
 node -v
 
+## M1 - Setup 0b: Font emoji per log Unicode
+# Installa il font emoji su Ubuntu per evitare che le icone nei log (es. 🤖, ✅, 🛡️) appaiano come quadratini.
+sudo apt install -y fonts-noto-color-emoji
+fc-cache -f -v
+
 ## Regole uso snippet
 pwd
 cd /home/thimoty/git/agents-course
