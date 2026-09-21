@@ -33,6 +33,10 @@ $Env:OPENAI_API_KEY = "sk-..." # required only for openai
 # $Env:OLLAMA_MODEL = "gemma4:e2b"
 # $Env:GEMINI_API_KEY = "..."
 # $Env:GEMINI_MODEL = "gemini-flash-latest"
+# $Env:DEEPSEEK_API_KEY = "..."
+# $Env:DEEPSEEK_MODEL = "deepseek-v4-pro"
+# $Env:DEEPSEEK_THINKING = "disabled"
+# $Env:EMBEDDING_PROVIDER = "gemini" # DeepSeek default; it has no embeddings API
 
 # 4 · Run one of the chapter examples
 python main_01_01.py
@@ -43,14 +47,30 @@ python main_01_01.py
 ### Internals
 
 * **Environment:** `env_config.load_env()` loads the project-root `.env` file and applies shared defaults.
-* **Model factory:** `llm_factory.get_chat_model()` and `llm_factory.get_embeddings_model()` select OpenAI, Ollama, or Gemini from `LLM_PROVIDER`.
+* **Model factory:** `llm_factory.get_chat_model()` selects OpenAI, Ollama, Gemini, or DeepSeek from `LLM_PROVIDER`. `get_embeddings_model()` uses `EMBEDDING_PROVIDER`; with DeepSeek it defaults to Gemini because DeepSeek has no embeddings API.
 * **Vector store:** Pages fetched with `AsyncHtmlLoader`, chunked and embedded with the configured embeddings provider, stored in **Chroma**.
-  * **Distribuzione rapida:** Se hai scaricato un database già pronto, copialo in `ch11/vectorstore_db/<provider>/` (es. `ch11/vectorstore_db/ollama/chroma.sqlite3`). Il programma lo rileverà automaticamente saltando la fase di embedding.
+  * **Distribuzione rapida:** Se hai scaricato un database già pronto, copialo in `ch11/vectorstore_db/<embedding-provider>/` (es. `ch11/vectorstore_db/gemini/chroma.sqlite3`). Il programma lo rileverà automaticamente saltando la fase di embedding.
   * **Download via terminale (Linux/WSL):**
     ```bash
     # Sostituisci ID_FILE con quello fornito dal docente
     wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=ID_FILE' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=ID_FILE" -O database.zip && rm -rf /tmp/cookies.txt
     ```
+
+### Usare gli embeddings Gemini già pronti
+
+Se `vectorstore_gemini.zip` è nella radice del progetto, estrailo una sola volta:
+
+```bash
+cd ch11
+mkdir -p vectorstore_db
+unzip ../vectorstore_gemini.zip -d vectorstore_db/
+```
+
+Verifica che esista `ch11/vectorstore_db/gemini/chroma.sqlite3`, poi imposta
+`LLM_PROVIDER=deepseek` e lascia `EMBEDDING_PROVIDER` vuoto (oppure impostalo
+esplicitamente a `gemini`). Gli esempi useranno DeepSeek per la chat e
+caricheranno il database Gemini esistente senza ricalcolare gli embeddings.
+
 * **Tool:** `search_travel_info` performs similarity search and returns top chunks.
 * **LangGraph:**
   * `chatbot` node -> LLM (may emit tool_calls).

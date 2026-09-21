@@ -29,6 +29,7 @@ _model_map = {
     "openai": (ENV.openai_model,  ENV.openai_embedding_model),
     "ollama": (ENV.ollama_model,  ENV.ollama_embedding_model),
     "gemini": (ENV.gemini_model,  ENV.gemini_embedding_model),
+    "deepseek": (ENV.deepseek_model, ENV.embedding_model),
 }
 _active_model, _active_embed = _model_map.get(ENV.llm_provider, ("?", "?"))
 print(f"⚙️  Provider : {ENV.llm_provider}")

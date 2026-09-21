@@ -24,6 +24,11 @@ class EnvSettings:
     ollama_embedding_model: str
     gemini_model: str
     gemini_embedding_model: str
+    deepseek_base_url: str
+    deepseek_model: str
+    deepseek_thinking: str
+    embedding_provider: str
+    embedding_model: str
 
 
 def _parse_env_file(env_path: Path) -> dict[str, str]:
@@ -84,6 +89,27 @@ def load_env(filename: str = ".env", override: bool = True) -> EnvSettings:
     os.environ.setdefault("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
     os.environ.setdefault("GEMINI_MODEL", "gemini-flash-latest")
     os.environ.setdefault("GEMINI_EMBEDDING_MODEL", "gemini-embedding-2-preview")
+    os.environ.setdefault("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+    os.environ.setdefault("DEEPSEEK_MODEL", "deepseek-v4-pro")
+    os.environ.setdefault("DEEPSEEK_THINKING", "disabled")
+    default_embedding_provider = (
+        "gemini" if os.environ["LLM_PROVIDER"].strip().lower() == "deepseek"
+        else os.environ["LLM_PROVIDER"].strip().lower()
+    )
+    if not os.getenv("EMBEDDING_PROVIDER"):
+        os.environ["EMBEDDING_PROVIDER"] = default_embedding_provider
+
+    embedding_models = {
+        "openai": os.environ["OPENAI_EMBEDDING_MODEL"],
+        "ollama": os.environ["OLLAMA_EMBEDDING_MODEL"],
+        "gemini": os.environ["GEMINI_EMBEDDING_MODEL"],
+    }
+    embedding_provider = os.environ["EMBEDDING_PROVIDER"].strip().lower()
+    if embedding_provider not in embedding_models:
+        raise RuntimeError(
+            f"Unsupported EMBEDDING_PROVIDER '{embedding_provider}'. "
+            "Use 'openai', 'ollama', or 'gemini'."
+        )
 
     # Return a structured snapshot so callers can inspect the effective setup
     # without reading directly from os.environ.
@@ -101,6 +127,11 @@ def load_env(filename: str = ".env", override: bool = True) -> EnvSettings:
         ollama_embedding_model=os.environ["OLLAMA_EMBEDDING_MODEL"],
         gemini_model=os.environ["GEMINI_MODEL"],
         gemini_embedding_model=os.environ["GEMINI_EMBEDDING_MODEL"],
+        deepseek_base_url=os.environ["DEEPSEEK_BASE_URL"],
+        deepseek_model=os.environ["DEEPSEEK_MODEL"],
+        deepseek_thinking=os.environ["DEEPSEEK_THINKING"],
+        embedding_provider=embedding_provider,
+        embedding_model=embedding_models[embedding_provider],
     )
 
 

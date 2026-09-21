@@ -39,7 +39,7 @@ search_result_text_and_summary_chain = (
     | RunnableParallel(
         {
             "text_summary": SUMMARY_PROMPT_TEMPLATE
-            | get_llm(provider="ollama")
+            | get_llm()
             | RunnableLambda(
                 dump_tap("LLM raw output (page summary)", icon="🤖", max_chars=2200)
             )

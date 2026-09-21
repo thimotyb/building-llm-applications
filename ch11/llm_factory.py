@@ -14,6 +14,28 @@ load_env()
 # chapter 11 entrypoint resolves provider settings in the same way.
 
 
+class ChatDeepSeek(ChatOpenAI):
+    """Use DeepSeek-compatible defaults on top of LangChain's OpenAI client."""
+
+    def with_structured_output(
+        self,
+        schema=None,
+        *,
+        method="function_calling",
+        include_raw=False,
+        strict=None,
+        **kwargs,
+    ):
+        # DeepSeek V4 currently rejects OpenAI's response_format=json_schema.
+        return super().with_structured_output(
+            schema,
+            method=method,
+            include_raw=include_raw,
+            strict=strict,
+            **kwargs,
+        )
+
+
 class GeminiEmbeddingsOneByOne:
     """Adapt Gemini embeddings to vector stores that expect one vector per text."""
 
@@ -36,10 +58,10 @@ def _provider() -> str:
     """Return the configured provider and validate the supported values."""
 
     provider = os.getenv("LLM_PROVIDER", "openai").strip().lower()
-    if provider not in {"openai", "ollama", "gemini"}:
+    if provider not in {"openai", "ollama", "gemini", "deepseek"}:
         raise RuntimeError(
             f"Unsupported LLM_PROVIDER '{provider}'. "
-            "Use 'openai', 'ollama', or 'gemini'."
+            "Use 'openai', 'ollama', 'gemini', or 'deepseek'."
         )
     return provider
 
@@ -69,7 +91,7 @@ def get_embeddings_model():
     come from OpenAI, Ollama, or Gemini.
     """
 
-    provider = _provider()
+    provider = os.getenv("EMBEDDING_PROVIDER", _provider()).strip().lower()
     if provider == "openai":
         return OpenAIEmbeddings(
             model=os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"),
@@ -79,6 +101,12 @@ def get_embeddings_model():
         return OllamaEmbeddings(
             model=os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text"),
             base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+        )
+
+    if provider != "gemini":
+        raise RuntimeError(
+            f"Unsupported EMBEDDING_PROVIDER '{provider}'. "
+            "Use 'openai', 'ollama', or 'gemini'."
         )
 
     embeddings = GoogleGenerativeAIEmbeddings(
@@ -124,6 +152,23 @@ def get_chat_model(
                     "model": model_name or os.getenv("OLLAMA_MODEL", "gemma4:e2b"),
                     "temperature": temperature,
                     "base_url": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+                }
+            )
+        )
+
+    if provider == "deepseek":
+        return ChatDeepSeek(
+            **_filter_none(
+                {
+                    "model": model_name or os.getenv("DEEPSEEK_MODEL", "deepseek-v4-pro"),
+                    "temperature": temperature,
+                    "base_url": os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
+                    "openai_api_key": _require_env("DEEPSEEK_API_KEY"),
+                    "extra_body": {
+                        "thinking": {
+                            "type": os.getenv("DEEPSEEK_THINKING", "disabled")
+                        }
+                    },
                 }
             )
         )

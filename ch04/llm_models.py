@@ -9,21 +9,58 @@ load_dotenv()  # A
 PROJECT_ROOT_ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 
 
+class ChatDeepSeek(ChatOpenAI):
+    """Use DeepSeek-compatible defaults on top of LangChain's OpenAI client."""
+
+    def with_structured_output(
+        self,
+        schema=None,
+        *,
+        method="function_calling",
+        include_raw=False,
+        strict=None,
+        **kwargs,
+    ):
+        return super().with_structured_output(
+            schema,
+            method=method,
+            include_raw=include_raw,
+            strict=strict,
+            **kwargs,
+        )
+
+
 def get_llm(
-    provider: str = "ollama",
+    provider: str | None = None,
     model_name: str | None = None,
     openai_api_key: str | None = None,
     gemini_api_key: str | None = None,
+    deepseek_api_key: str | None = None,
 ):  # B
-    selected_provider = provider.lower().strip()
+    env_data = (
+        dotenv_values(PROJECT_ROOT_ENV_FILE)
+        if PROJECT_ROOT_ENV_FILE.exists()
+        else {}
+    )
+    selected_provider = (
+        provider
+        or os.getenv("LLM_PROVIDER")
+        or env_data.get("LLM_PROVIDER")
+        or "ollama"
+    ).lower().strip()
 
     if selected_provider == "ollama":
-        return ChatOllama(model=model_name or "gemma4:e2b")
+        return ChatOllama(
+            model=model_name
+            or os.getenv("OLLAMA_MODEL")
+            or env_data.get("OLLAMA_MODEL", "gemma4:e2b"),
+            base_url=os.getenv("OLLAMA_BASE_URL")
+            or env_data.get("OLLAMA_BASE_URL", "http://localhost:11434"),
+        )
 
     if selected_provider == "openai":
         api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
-        if not api_key and PROJECT_ROOT_ENV_FILE.exists():
-            api_key = dotenv_values(PROJECT_ROOT_ENV_FILE).get("OPENAI_API_KEY")
+        api_key = api_key or env_data.get("OPENAI_API_KEY")
         if not api_key:
             raise ValueError(
                 "OPENAI_API_KEY is missing. Pass openai_api_key=..., set env var, "
@@ -31,14 +68,14 @@ def get_llm(
             )
         return ChatOpenAI(
             openai_api_key=api_key,
-            model_name=model_name or "gpt-5-nano",
+            model_name=model_name
+            or os.getenv("OPENAI_MODEL")
+            or env_data.get("OPENAI_MODEL", "gpt-5-nano"),
         )
 
     if selected_provider == "gemini":
         api_key = gemini_api_key or os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
-        if not api_key and PROJECT_ROOT_ENV_FILE.exists():
-            env_data = dotenv_values(PROJECT_ROOT_ENV_FILE)
-            api_key = env_data.get("GOOGLE_API_KEY") or env_data.get("GEMINI_API_KEY")
+        api_key = api_key or env_data.get("GOOGLE_API_KEY") or env_data.get("GEMINI_API_KEY")
         if not api_key:
             raise ValueError(
                 "Gemini API key is missing. Pass gemini_api_key=..., set "
@@ -47,11 +84,34 @@ def get_llm(
             )
         return ChatGoogleGenerativeAI(
             google_api_key=api_key,
-            model=model_name or "gemini-flash-latest",
+            model=model_name
+            or os.getenv("GEMINI_MODEL")
+            or env_data.get("GEMINI_MODEL", "gemini-flash-latest"),
+        )
+
+    if selected_provider == "deepseek":
+        api_key = deepseek_api_key or os.getenv("DEEPSEEK_API_KEY")
+        api_key = api_key or env_data.get("DEEPSEEK_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "DEEPSEEK_API_KEY is missing. Pass deepseek_api_key=..., set "
+                "the environment variable, or add it to the project root .env file."
+            )
+        thinking = os.getenv("DEEPSEEK_THINKING") or env_data.get(
+            "DEEPSEEK_THINKING", "disabled"
+        )
+        return ChatDeepSeek(
+            openai_api_key=api_key,
+            base_url=os.getenv("DEEPSEEK_BASE_URL")
+            or env_data.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
+            model_name=model_name
+            or os.getenv("DEEPSEEK_MODEL")
+            or env_data.get("DEEPSEEK_MODEL", "deepseek-v4-pro"),
+            extra_body={"thinking": {"type": thinking}},
         )
 
     raise ValueError(
-        f"Unsupported provider '{provider}'. Use 'ollama', 'openai', or 'gemini'."
+        f"Unsupported provider '{selected_provider}'. Use 'ollama', 'openai', 'gemini', or 'deepseek'."
     )
 
 

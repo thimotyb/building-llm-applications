@@ -63,7 +63,7 @@ web_research_chain = (
         dump_tap("Merged research summary payload", icon="📚", max_chars=3500)
     )
     | RESEARCH_REPORT_PROMPT_TEMPLATE
-    | get_llm(provider="ollama")
+    | get_llm()
     | RunnableLambda(
         dump_tap("LLM raw output (final report)", icon="🤖", max_chars=4000)
     )

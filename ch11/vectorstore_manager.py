@@ -10,10 +10,10 @@ from llm_factory import get_embeddings_model, load_env
 ENV = load_env()
 
 def get_vectorstore_path() -> str:
-    """Return the path to the persistent vector store, unique to the provider."""
+    """Return the path to the persistent vector store for the embedding provider."""
     # We use a path inside ch11 directory
     base_dir = Path(__file__).parent / "vectorstore_db"
-    provider_dir = base_dir / ENV.llm_provider
+    provider_dir = base_dir / ENV.embedding_provider
     return str(provider_dir)
 
 async def build_vectorstore(destinations: Sequence[str]) -> Chroma:
