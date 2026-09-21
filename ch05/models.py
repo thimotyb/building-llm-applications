@@ -31,6 +31,12 @@ class ChatDeepSeek(ChatOpenAI):
         )
 
 
+def _announce_model(provider: str, model: str) -> None:
+    """Show the effective provider and model without exposing credentials."""
+
+    print(f"🤖 Using {provider} model: {model}")
+
+
 def _env_value(*names: str) -> str | None:
     for name in names:
         value = os.getenv(name)
@@ -58,6 +64,7 @@ def get_llm(
 
     if selected_provider == "ollama":
         model = model_name or _env_value("LLM_MODEL", "OLLAMA_MODEL") or "gemma4:e2b"
+        _announce_model(selected_provider, model)
         return ChatOllama(model=model)
 
     if selected_provider == "openai":
@@ -68,6 +75,7 @@ def get_llm(
                 "or add it to the project root .env file."
             )
         model = model_name or _env_value("LLM_MODEL", "OPENAI_MODEL") or "gpt-5-nano"
+        _announce_model(selected_provider, model)
         return ChatOpenAI(
             openai_api_key=api_key,
             model_name=model,
@@ -82,6 +90,7 @@ def get_llm(
                 "project root .env file."
             )
         model = model_name or _env_value("LLM_MODEL", "GEMINI_MODEL") or "gemini-flash-latest"
+        _announce_model(selected_provider, model)
         return ChatGoogleGenerativeAI(
             google_api_key=api_key,
             model=model,
@@ -95,6 +104,7 @@ def get_llm(
                 "the environment variable, or add it to the project root .env file."
             )
         model = model_name or _env_value("LLM_MODEL", "DEEPSEEK_MODEL") or "deepseek-v4-pro"
+        _announce_model(selected_provider, model)
         return ChatDeepSeek(
             openai_api_key=api_key,
             base_url=_env_value("DEEPSEEK_BASE_URL") or "https://api.deepseek.com",

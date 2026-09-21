@@ -30,6 +30,12 @@ class ChatDeepSeek(ChatOpenAI):
         )
 
 
+def _announce_model(provider: str, model: str) -> None:
+    """Show the effective provider and model without exposing credentials."""
+
+    print(f"🤖 Using {provider} model: {model}")
+
+
 def get_llm(
     provider: str | None = None,
     model_name: str | None = None,
@@ -50,10 +56,14 @@ def get_llm(
     ).lower().strip()
 
     if selected_provider == "ollama":
-        return ChatOllama(
-            model=model_name
+        model = (
+            model_name
             or os.getenv("OLLAMA_MODEL")
-            or env_data.get("OLLAMA_MODEL", "gemma4:e2b"),
+            or env_data.get("OLLAMA_MODEL", "gemma4:e2b")
+        )
+        _announce_model(selected_provider, model)
+        return ChatOllama(
+            model=model,
             base_url=os.getenv("OLLAMA_BASE_URL")
             or env_data.get("OLLAMA_BASE_URL", "http://localhost:11434"),
         )
@@ -66,11 +76,15 @@ def get_llm(
                 "OPENAI_API_KEY is missing. Pass openai_api_key=..., set env var, "
                 "or add it to the project root .env file."
             )
+        model = (
+            model_name
+            or os.getenv("OPENAI_MODEL")
+            or env_data.get("OPENAI_MODEL", "gpt-5-nano")
+        )
+        _announce_model(selected_provider, model)
         return ChatOpenAI(
             openai_api_key=api_key,
-            model_name=model_name
-            or os.getenv("OPENAI_MODEL")
-            or env_data.get("OPENAI_MODEL", "gpt-5-nano"),
+            model_name=model,
         )
 
     if selected_provider == "gemini":
@@ -82,11 +96,15 @@ def get_llm(
                 "GOOGLE_API_KEY/GEMINI_API_KEY, or add one of them to the "
                 "project root .env file."
             )
+        model = (
+            model_name
+            or os.getenv("GEMINI_MODEL")
+            or env_data.get("GEMINI_MODEL", "gemini-flash-latest")
+        )
+        _announce_model(selected_provider, model)
         return ChatGoogleGenerativeAI(
             google_api_key=api_key,
-            model=model_name
-            or os.getenv("GEMINI_MODEL")
-            or env_data.get("GEMINI_MODEL", "gemini-flash-latest"),
+            model=model,
         )
 
     if selected_provider == "deepseek":
@@ -100,13 +118,17 @@ def get_llm(
         thinking = os.getenv("DEEPSEEK_THINKING") or env_data.get(
             "DEEPSEEK_THINKING", "disabled"
         )
+        model = (
+            model_name
+            or os.getenv("DEEPSEEK_MODEL")
+            or env_data.get("DEEPSEEK_MODEL", "deepseek-v4-pro")
+        )
+        _announce_model(selected_provider, model)
         return ChatDeepSeek(
             openai_api_key=api_key,
             base_url=os.getenv("DEEPSEEK_BASE_URL")
             or env_data.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
-            model_name=model_name
-            or os.getenv("DEEPSEEK_MODEL")
-            or env_data.get("DEEPSEEK_MODEL", "deepseek-v4-pro"),
+            model_name=model,
             extra_body={"thinking": {"type": thinking}},
         )
 
