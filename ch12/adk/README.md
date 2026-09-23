@@ -47,11 +47,34 @@ The `ollama show` output should list `tools` under Capabilities. Neither
 provider needs a Google API key. This sample uses LiteLLM's Python connector
 directly; a LiteLLM Proxy is not required.
 
-## Run
+## Run in the terminal
+
+From the repository root:
 
 ```bash
 ch12/env_ch12/bin/adk run ch12/adk
 ```
+
+## Run in the browser
+
+From the repository root, start the ADK development web interface:
+
+```bash
+ch12/env_ch12/bin/adk web --no_use_local_storage ch12
+```
+
+Pass `ch12`, the **parent directory** of the `adk` agent folder, to `adk web`.
+Open <http://127.0.0.1:8000> in a browser, select `adk` from the agent list,
+start a session, and send a travel request. The interface also shows the
+DuckDuckGo and Open-Meteo tool events. Stop the server with `Ctrl+C` in the
+terminal. The `--no_use_local_storage` option keeps session data in memory;
+the conversation is lost when the server stops.
+
+Because the virtual environment is also inside `ch12`, the list may additionally
+show `env_ch12`; select `adk`, which contains this agent.
+
+The browser interface uses the model selected by `LLM_PROVIDER` in the root
+`.env` when the server starts. Restart the server after changing providers.
 
 Example prompt:
 
@@ -67,6 +90,7 @@ to 16 days ahead; the agent reports when a date is outside that window.
 ## Sources and architecture
 
 - [ADK LiteLLM connector](https://adk.dev/agents/models/litellm/)
+- [ADK web interface](https://adk.dev/runtime/web-interface/)
 - [ADK Ollama connector and `ollama_chat` guidance](https://adk.dev/agents/models/ollama/)
 - [LiteLLM DeepSeek provider](https://docs.litellm.ai/docs/providers/deepseek)
 - [Open-Meteo forecast API](https://open-meteo.com/en/docs) and [geocoding API](https://open-meteo.com/en/docs/geocoding-api)
