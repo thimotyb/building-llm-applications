@@ -14,7 +14,7 @@ assistant_instructions_chain = (
         )
     )
     | ASSISTANT_SELECTION_PROMPT_TEMPLATE
-    | get_llm(provider="ollama")
+    | get_llm()
     | RunnableLambda(
         dump_tap("LLM raw output (assistant selection)", icon="🤖", max_chars=3000)
     )

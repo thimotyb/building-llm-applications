@@ -10,6 +10,33 @@ PROJECT_ROOT_ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(PROJECT_ROOT_ENV_FILE)
 
 
+class ChatDeepSeek(ChatOpenAI):
+    """Use DeepSeek-compatible defaults on top of LangChain's OpenAI client."""
+
+    def with_structured_output(
+        self,
+        schema=None,
+        *,
+        method="function_calling",
+        include_raw=False,
+        strict=None,
+        **kwargs,
+    ):
+        return super().with_structured_output(
+            schema,
+            method=method,
+            include_raw=include_raw,
+            strict=strict,
+            **kwargs,
+        )
+
+
+def _announce_model(provider: str, model: str) -> None:
+    """Show the effective provider and model without exposing credentials."""
+
+    print(f"🤖 Using {provider} model: {model}")
+
+
 def _env_value(*names: str) -> str | None:
     for name in names:
         value = os.getenv(name)
@@ -31,11 +58,13 @@ def get_llm(
     model_name: str | None = None,
     openai_api_key: str | None = None,
     gemini_api_key: str | None = None,
+    deepseek_api_key: str | None = None,
 ):
     selected_provider = (provider or _env_value("LLM_PROVIDER") or "ollama").lower().strip()
 
     if selected_provider == "ollama":
         model = model_name or _env_value("LLM_MODEL", "OLLAMA_MODEL") or "gemma4:e2b"
+        _announce_model(selected_provider, model)
         return ChatOllama(model=model)
 
     if selected_provider == "openai":
@@ -46,6 +75,7 @@ def get_llm(
                 "or add it to the project root .env file."
             )
         model = model_name or _env_value("LLM_MODEL", "OPENAI_MODEL") or "gpt-5-nano"
+        _announce_model(selected_provider, model)
         return ChatOpenAI(
             openai_api_key=api_key,
             model_name=model,
@@ -60,13 +90,34 @@ def get_llm(
                 "project root .env file."
             )
         model = model_name or _env_value("LLM_MODEL", "GEMINI_MODEL") or "gemini-flash-latest"
+        _announce_model(selected_provider, model)
         return ChatGoogleGenerativeAI(
             google_api_key=api_key,
             model=model,
         )
 
+    if selected_provider == "deepseek":
+        api_key = deepseek_api_key or _env_value("DEEPSEEK_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "DEEPSEEK_API_KEY is missing. Pass deepseek_api_key=..., set "
+                "the environment variable, or add it to the project root .env file."
+            )
+        model = model_name or _env_value("LLM_MODEL", "DEEPSEEK_MODEL") or "deepseek-v4-pro"
+        _announce_model(selected_provider, model)
+        return ChatDeepSeek(
+            openai_api_key=api_key,
+            base_url=_env_value("DEEPSEEK_BASE_URL") or "https://api.deepseek.com",
+            model_name=model,
+            extra_body={
+                "thinking": {
+                    "type": _env_value("DEEPSEEK_THINKING") or "disabled"
+                }
+            },
+        )
+
     raise ValueError(
-        f"Unsupported provider '{provider}'. Use 'ollama', 'openai', or 'gemini'."
+        f"Unsupported provider '{provider}'. Use 'ollama', 'openai', 'gemini', or 'deepseek'."
     )
 
 # Define typed dictionaries for state handling

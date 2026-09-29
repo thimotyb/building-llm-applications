@@ -28,7 +28,7 @@ web_searches_chain = (
         }
     )
     | WEB_SEARCH_PROMPT_TEMPLATE
-    | get_llm(provider="ollama")
+    | get_llm()
     | RunnableLambda(
         dump_tap("LLM raw output (web search queries)", icon="🤖", max_chars=3000)
     )
