@@ -1,0 +1,20 @@
+services:
+  shipping-specialist:
+    build:
+      context: ..
+      dockerfile: ch13/Dockerfile
+    image: ch13-a2a-shipping-specialist:latest
+    ports:
+      - "8001:8001"
+    environment:
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-gemma4:12b}"
+      OLLAMA_BASE_URL: "http://host.docker.internal:11434"
+      # Uvicorn binds to 0.0.0.0; this is the address published in the card.
+      A2A_SERVER_HOST: "${A2A_SERVER_HOST:-127.0.0.1}"
+      A2A_SERVER_PORT: "8001"
+      A2A_SERVER_PROTOCOL: "http"
+    extra_hosts:
+      # Docker Desktop already provides this name; host-gateway also supports
+      # a native Linux Docker Engine.
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

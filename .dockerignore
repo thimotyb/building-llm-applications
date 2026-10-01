@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+.venv
+**/.venv
+**/venv
+**/env
+**/env_*
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+ch08/venv_ch08

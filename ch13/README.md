@@ -117,6 +117,83 @@ ch13/.venv/bin/python -m pytest ch13/tests
 For an end-to-end check, start Ollama and both agents, then verify that the
 client delegates the request and returns the remote estimate.
 
+## Run the A2A server as a Docker image
+
+The image contains the A2A server, while Ollama and the model remain on the
+host. With Docker Desktop integrated into this Ubuntu WSL2 distribution,
+containers can reach the host through `host.docker.internal`.
+
+First verify the exact model tag exposed by Ollama:
+
+```bash
+ollama list
+curl --fail http://127.0.0.1:11434/api/tags
+```
+
+The Compose configuration defaults to `gemma4:12b`. If `ollama list` reports a
+different tag, export it before starting the container, for example:
+
+```bash
+export OLLAMA_MODEL=gemma4:12b
+```
+
+Ollama must accept connections that originate outside its own loopback
+interface. If it currently listens only on `127.0.0.1`, restart it with:
+
+```bash
+OLLAMA_HOST=0.0.0.0:11434 ollama serve
+```
+
+Do not publish port 11434 on an untrusted network. On Windows, also allow the
+connection through the firewall only for the Docker/WSL private network.
+
+Build and start the server from the repository root:
+
+```bash
+docker compose -f ch13/compose.yaml up --build -d
+docker compose -f ch13/compose.yaml logs -f shipping-specialist
+```
+
+Verify that the container is healthy and that its Agent Card is reachable from
+WSL2:
+
+```bash
+docker compose -f ch13/compose.yaml ps
+curl --fail --silent http://127.0.0.1:8001/.well-known/agent-card.json \
+  | python3 -m json.tool
+```
+
+The local client continues to use the default card URL, so it can be run
+unchanged in another WSL2 terminal:
+
+```bash
+ch13/.venv/bin/adk run ch13/a2a_client
+```
+
+To build and run without Compose:
+
+```bash
+docker build -f ch13/Dockerfile -t ch13-a2a-shipping-specialist .
+docker run --rm --name shipping-specialist \
+  --add-host host.docker.internal:host-gateway \
+  -p 8001:8001 \
+  -e OLLAMA_MODEL=gemma4:12b \
+  -e OLLAMA_BASE_URL=http://host.docker.internal:11434 \
+  -e A2A_SERVER_HOST=127.0.0.1 \
+  ch13-a2a-shipping-specialist
+```
+
+Stop and remove the Compose container with:
+
+```bash
+docker compose -f ch13/compose.yaml down
+```
+
+`A2A_SERVER_HOST` is the address advertised in the Agent Card, not Uvicorn's
+bind address. Keep `127.0.0.1` when the consumer runs on the same host. For a
+remote consumer, set it to the DNS name or IP through which port 8001 is
+actually reachable.
+
 ## From local development to deployment
 
 The local server is an ASGI application, so it can be containerized for Cloud
