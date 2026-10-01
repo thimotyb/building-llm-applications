@@ -1,3 +1,6 @@
+# Step 01.01: Build a minimal RAG agent loop manually with LangGraph.
+# It demonstrates tool binding, vector retrieval, tool execution, and conditional routing.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------

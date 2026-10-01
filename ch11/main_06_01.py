@@ -1,3 +1,6 @@
+# Step 06.01: Replace single-agent routing with an LLM supervisor over two specialists.
+# It demonstrates coordinated handoffs for requests that may require both agents.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------

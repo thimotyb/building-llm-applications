@@ -1,3 +1,6 @@
+# Step 07.01: Replace the mock weather function with live AccuWeather tools exposed over MCP.
+# It demonstrates asynchronous MCP discovery and combining remote tools with local RAG.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------

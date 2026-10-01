@@ -1,3 +1,6 @@
+# Step 08.01: Add conversational memory to the routed multi-agent graph with checkpoints.
+# It demonstrates thread-scoped state persistence across multiple user turns.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------

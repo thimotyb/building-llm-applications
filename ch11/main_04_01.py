@@ -1,3 +1,6 @@
+# Step 04.01: Add a specialized accommodation agent backed by SQL and BnB tools.
+# It demonstrates tool-based hotel and room-availability queries alongside the travel agent.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------

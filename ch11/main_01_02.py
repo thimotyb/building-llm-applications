@@ -1,3 +1,6 @@
+# Step 01.02: Extend the minimal RAG agent by exporting its graph as a Mermaid PNG.
+# It demonstrates how to inspect and visualize the LangGraph topology after execution.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------

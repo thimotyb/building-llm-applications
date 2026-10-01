@@ -1,3 +1,6 @@
+# Step 09.01: Add a structured-output guardrail before routing user requests.
+# It demonstrates rejecting non-travel questions through a dedicated refusal path.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------

@@ -1,3 +1,6 @@
+# Step 09.02: Extend guardrails into each specialist with pre-model hooks.
+# It demonstrates layered validation for both topic scope and Cornwall-specific requests.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------

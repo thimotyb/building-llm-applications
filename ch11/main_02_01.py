@@ -1,3 +1,6 @@
+# Step 02.01: Add a second, mock weather tool to the travel-information RAG agent.
+# It demonstrates how an LLM selects and combines multiple tools in the same agent loop.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------

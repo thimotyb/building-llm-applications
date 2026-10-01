@@ -1,3 +1,6 @@
+# Step 03.01: Replace the hand-built loop with LangGraph's legacy create_react_agent API.
+# It intentionally preserves the deprecated API as the baseline for the next upgrade step.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------

@@ -1,3 +1,6 @@
+# Step 05.01: Connect the travel and accommodation agents through a structured-output router.
+# It demonstrates a custom multi-agent graph that delegates each request to one specialist.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------

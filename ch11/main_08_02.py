@@ -1,3 +1,6 @@
+# Step 08.02: Inspect checkpoint history and resume execution from a selected snapshot.
+# It demonstrates LangGraph state retrieval, replay, and time-travel-style continuation.
+
 # -----------------------------------------------------------------------------
 # Import libraries
 # -----------------------------------------------------------------------------
