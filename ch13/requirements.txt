@@ -1,0 +1,5 @@
+google-adk[a2a]>=1.39,<2
+litellm>=1.84,!=1.82.7,!=1.82.8
+python-dotenv>=1,<2
+pytest>=8,<10
+uvicorn>=0.30,<1
