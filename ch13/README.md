@@ -8,8 +8,8 @@ processes:
   through ADK's `RemoteA2aAgent`.
 
 The server owns the shipping tool and its implementation. The client sees only
-the remote agent's public A2A contract. Both agents use the course-default local
-Ollama runtime, so the local exercise needs no cloud API key.
+the remote agent's public A2A contract. Both agents select Ollama, DeepSeek, or
+Gemini through the project-root `.env`.
 
 The A2A protocol and SDK are stable specifications, while ADK 1.39 still marks
 its A2A integration classes as experimental. Pin and test the ADK version before
@@ -50,19 +50,47 @@ ch13/.venv/bin/python -m pip install --upgrade pip
 ch13/.venv/bin/python -m pip install -r ch13/requirements.txt
 ```
 
-Start Ollama and ensure the default model is installed:
+Select the provider in the existing project-root `.env`. The same setting is
+used by both the A2A server and client:
+
+```dotenv
+LLM_PROVIDER=ollama
+OLLAMA_MODEL=gemma4:12b
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+```
+
+Supported configurations are:
+
+| `LLM_PROVIDER` | Required settings | LiteLLM route |
+| --- | --- | --- |
+| `ollama` | `OLLAMA_MODEL`; optional `OLLAMA_BASE_URL` | `ollama_chat/<model>` |
+| `deepseek` | `DEEPSEEK_MODEL`, `DEEPSEEK_API_KEY`; optional `DEEPSEEK_BASE_URL`, `DEEPSEEK_THINKING` | `deepseek/<model>` |
+| `gemini` | `GEMINI_MODEL`, plus `GEMINI_API_KEY` or `GOOGLE_API_KEY` | `gemini/<model>` |
+
+For example, select DeepSeek with:
+
+```dotenv
+LLM_PROVIDER=deepseek
+DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_API_KEY=replace-me
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_THINKING=disabled
+```
+
+Or Gemini with:
+
+```dotenv
+LLM_PROVIDER=gemini
+GEMINI_MODEL=gemini-flash-latest
+GEMINI_API_KEY=replace-me
+```
+
+When using Ollama, start it and ensure the selected model is installed:
 
 ```bash
 ollama serve
-ollama pull gemma4:e4b
-ollama show gemma4:e4b
-```
-
-The model can be changed in the existing project-root `.env`:
-
-```dotenv
-OLLAMA_MODEL=gemma4:e4b
-OLLAMA_BASE_URL=http://127.0.0.1:11434
+ollama pull gemma4:12b
+ollama show gemma4:12b
 ```
 
 ## 1. Start the A2A server
@@ -119,9 +147,11 @@ client delegates the request and returns the remote estimate.
 
 ## Run the A2A server as a Docker image
 
-The image contains the A2A server, while Ollama and the model remain on the
-host. With Docker Desktop integrated into this Ubuntu WSL2 distribution,
-containers can reach the host through `host.docker.internal`.
+The image contains the A2A server. Provider selection and credentials are
+injected when the container starts; they are not copied into the image. When
+Ollama is selected, its model remains on the host. With Docker Desktop
+integrated into this Ubuntu WSL2 distribution, containers reach it through
+`host.docker.internal`.
 
 First verify the exact model tag exposed by Ollama:
 
@@ -147,10 +177,33 @@ OLLAMA_HOST=0.0.0.0:11434 ollama serve
 Do not publish port 11434 on an untrusted network. On Windows, also allow the
 connection through the firewall only for the Docker/WSL private network.
 
-Build and start the server from the repository root:
+Build and start the server from the repository root. `--env-file .env` makes
+Compose read provider settings from the root file rather than from `ch13`:
 
 ```bash
-docker compose -f ch13/compose.yaml up --build -d
+docker compose --env-file .env -f ch13/compose.yaml up --build -d
+```
+
+To choose a provider specifically for this container start, put the override
+before the command. Shell values take precedence over `.env` values:
+
+```bash
+# Local Ollama on the Docker host
+LLM_PROVIDER=ollama OLLAMA_MODEL=gemma4:12b \
+  docker compose --env-file .env -f ch13/compose.yaml up --build -d
+
+# DeepSeek API; key and model are read from .env
+LLM_PROVIDER=deepseek \
+  docker compose --env-file .env -f ch13/compose.yaml up --build -d
+
+# Gemini API; key and model are read from .env
+LLM_PROVIDER=gemini \
+  docker compose --env-file .env -f ch13/compose.yaml up --build -d
+```
+
+Inspect startup logs without printing the injected credentials:
+
+```bash
 docker compose -f ch13/compose.yaml logs -f shipping-specialist
 ```
 
@@ -175,13 +228,20 @@ To build and run without Compose:
 ```bash
 docker build -f ch13/Dockerfile -t ch13-a2a-shipping-specialist .
 docker run --rm --name shipping-specialist \
+  --env-file .env \
   --add-host host.docker.internal:host-gateway \
   -p 8001:8001 \
+  -e LLM_PROVIDER=ollama \
   -e OLLAMA_MODEL=gemma4:12b \
   -e OLLAMA_BASE_URL=http://host.docker.internal:11434 \
   -e A2A_SERVER_HOST=127.0.0.1 \
   ch13-a2a-shipping-specialist
 ```
+
+For a cloud provider, replace the three Ollama `-e` options with
+`-e LLM_PROVIDER=deepseek` or `-e LLM_PROVIDER=gemini`; `--env-file .env`
+supplies the matching model and API key. Options placed after `--env-file`
+override values loaded from it.
 
 Stop and remove the Compose container with:
 

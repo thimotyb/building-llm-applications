@@ -9,4 +9,5 @@
 **/__pycache__
 **/*.py[cod]
 **/.pytest_cache
+**/.adk
 ch08/venv_ch08
