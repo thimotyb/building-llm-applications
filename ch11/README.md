@@ -13,34 +13,40 @@ The early examples use a single travel-search tool (`search_travel_info`) and th
 
 ---
 
-## Setup (PowerShell)
+## Setup (Ubuntu/WSL)
 
-```powershell
+Run these commands from the repository root:
+
+```bash
 # 1 · Virtual environment
-python -m venv env_ch11
-.\env_ch11\Scripts\Activate.ps1
+python3 -m venv ch11/.venv
+source ch11/.venv/bin/activate
 
 # 2 · Dependencies
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r ch11/requirements.txt
 
 # 3 · LLM provider settings (session-only)
-$Env:LLM_PROVIDER = "openai"   # openai, ollama, or gemini
-$Env:OPENAI_API_KEY = "sk-..." # required only for openai
+export LLM_PROVIDER="openai"   # openai, ollama, gemini, or deepseek
+export OPENAI_API_KEY="sk-..." # required only for openai
 
 # Optional provider-specific overrides:
-# $Env:OPENAI_MODEL = "gpt-5-nano"
-# $Env:OLLAMA_BASE_URL = "http://localhost:11434"
-# $Env:OLLAMA_MODEL = "gemma4:e2b"
-# $Env:GEMINI_API_KEY = "..."
-# $Env:GEMINI_MODEL = "gemini-flash-latest"
-# $Env:DEEPSEEK_API_KEY = "..."
-# $Env:DEEPSEEK_MODEL = "deepseek-v4-pro"
-# $Env:DEEPSEEK_THINKING = "disabled"
-# $Env:EMBEDDING_PROVIDER = "gemini" # DeepSeek default; it has no embeddings API
+# export OPENAI_MODEL="gpt-5-nano"
+# export OLLAMA_BASE_URL="http://localhost:11434"
+# export OLLAMA_MODEL="gemma4:e2b"
+# export GEMINI_API_KEY="..."
+# export GEMINI_MODEL="gemini-flash-latest"
+# export DEEPSEEK_API_KEY="..."
+# export DEEPSEEK_MODEL="deepseek-v4-pro"
+# export DEEPSEEK_THINKING="disabled"
+# export EMBEDDING_PROVIDER="gemini" # DeepSeek default; it has no embeddings API
 
 # 4 · Run one of the chapter examples
-python main_01_01.py
+python ch11/main_01_01.py
 ```
+
+Instead of exporting settings for every shell, copy `.env.example` to `.env`
+in the repository root and edit it. `env_config.load_env()` loads that file.
 
 ---
 
@@ -50,26 +56,55 @@ python main_01_01.py
 * **Model factory:** `llm_factory.get_chat_model()` selects OpenAI, Ollama, Gemini, or DeepSeek from `LLM_PROVIDER`. `get_embeddings_model()` uses `EMBEDDING_PROVIDER`; with DeepSeek it defaults to Gemini because DeepSeek has no embeddings API.
 * **Vector store:** Pages fetched with `AsyncHtmlLoader`, chunked and embedded with the configured embeddings provider, stored in **Chroma**.
   * **Distribuzione rapida:** Se hai scaricato un database già pronto, copialo in `ch11/vectorstore_db/<embedding-provider>/` (es. `ch11/vectorstore_db/gemini/chroma.sqlite3`). Il programma lo rileverà automaticamente saltando la fase di embedding.
-  * **Download via terminale (Linux/WSL):**
-    ```bash
-    # Sostituisci ID_FILE con quello fornito dal docente
-    wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=ID_FILE' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=ID_FILE" -O database.zip && rm -rf /tmp/cookies.txt
-    ```
 
-### Usare gli embeddings Gemini già pronti
+### Scaricare i vector store già pronti
 
-Se `vectorstore_gemini.zip` è nella radice del progetto, estrailo una sola volta:
+Gli archivi sono pubblicati con il materiale del corso su Netlify. Su
+Ubuntu/WSL installa prima gli strumenti necessari, se non sono già presenti:
 
 ```bash
-cd ch11
-mkdir -p vectorstore_db
-unzip ../vectorstore_gemini.zip -d vectorstore_db/
+sudo apt update
+sudo apt install -y wget unzip
 ```
 
-Verifica che esista `ch11/vectorstore_db/gemini/chroma.sqlite3`, poi imposta
-`LLM_PROVIDER=deepseek` e lascia `EMBEDDING_PROVIDER` vuoto (oppure impostalo
-esplicitamente a `gemini`). Gli esempi useranno DeepSeek per la chat e
-caricheranno il database Gemini esistente senza ricalcolare gli embeddings.
+Per gli embeddings Ollama, dalla radice del repository:
+
+```bash
+mkdir -p ch11/vectorstore_db
+wget -O /tmp/database_ollama.zip \
+  https://agents-course.netlify.app/assets/database_ollama.zip
+unzip -o /tmp/database_ollama.zip -d ch11/vectorstore_db
+rm -f /tmp/database_ollama.zip
+test -f ch11/vectorstore_db/ollama/chroma.sqlite3
+```
+
+Poi configura:
+
+```bash
+export EMBEDDING_PROVIDER=ollama
+```
+
+Per gli embeddings Gemini:
+
+```bash
+mkdir -p ch11/vectorstore_db
+wget -O /tmp/database_gemini.zip \
+  https://agents-course.netlify.app/assets/database_gemini.zip
+unzip -o /tmp/database_gemini.zip -d ch11/vectorstore_db
+rm -f /tmp/database_gemini.zip
+test -f ch11/vectorstore_db/gemini/chroma.sqlite3
+```
+
+Poi configura:
+
+```bash
+export EMBEDDING_PROVIDER=gemini
+```
+
+Con `LLM_PROVIDER=deepseek`, lasciare `EMBEDDING_PROVIDER` vuoto seleziona già
+Gemini come default, perché DeepSeek non offre un endpoint embeddings. Il
+provider del vector store deve corrispondere all'archivio estratto: database
+generati con modelli di embedding diversi non sono intercambiabili.
 
 * **Tool:** `search_travel_info` performs similarity search and returns top chunks.
 * **LangGraph:**
