@@ -1,0 +1,120 @@
+{"text": "Invoice 5441 shows the wrong amount. Please just fix it. This blocks our launch tomorrow morning.", "team": "billing", "urgent": true, "refund": false, "id": 0}
+{"text": "The API has been timing out since this morning. I do not want a refund, I only want this resolved.", "team": "engineering", "urgent": false, "refund": false, "id": 1}
+{"text": "What is the difference between the Pro and Team plans? Please just fix it. Take your time.", "team": "sales", "urgent": false, "refund": false, "id": 2}
+{"text": "Invoice 3638 shows the wrong amount. Please just fix it. I need this solved today.", "team": "billing", "urgent": true, "refund": false, "id": 3}
+{"text": "The API has been timing out since this morning. Please refund the amount. This blocks our launch tomorrow morning.", "team": "engineering", "urgent": true, "refund": true, "id": 4}
+{"text": "Do you offer a discount for non-profits? Please answer within a few hours, I travel tonight.", "team": "sales", "urgent": true, "refund": false, "id": 5}
+{"text": "The subscription fee was taken after I cancelled. Please refund the amount.", "team": "billing", "urgent": false, "refund": true, "id": 6}
+{"text": "I cannot log in and the reset email never arrives. I want my money back. Take your time.", "team": "engineering", "urgent": false, "refund": true, "id": 7}
+{"text": "I would like a quote for 200 seats. Please just fix it. No rush, whenever you have time.", "team": "sales", "urgent": false, "refund": false, "id": 8}
+{"text": "I was charged twice for order 9614. This blocks our launch tomorrow morning.", "team": "billing", "urgent": true, "refund": false, "id": 9}
+{"text": "I cannot log in and the reset email never arrives. Please just fix it. This blocks our launch tomorrow morning.", "team": "engineering", "urgent": true, "refund": false, "id": 10}
+{"text": "I would like a quote for 200 seats. I do not want a refund, I only want this resolved. This blocks our launch tomorrow morning.", "team": "sales", "urgent": true, "refund": false, "id": 11}
+{"text": "A payment of 49 EUR appears on my statement and I do not recognise it. This blocks our launch tomorrow morning.", "team": "billing", "urgent": true, "refund": false, "id": 12}
+{"text": "The checkout page returns a 500 error on order 7646. I do not want a refund, I only want this resolved. No rush, whenever you have time.", "team": "engineering", "urgent": false, "refund": false, "id": 13}
+{"text": "Do you offer a discount for non-profits? Please just fix it. This blocks our launch tomorrow morning.", "team": "sales", "urgent": true, "refund": false, "id": 14}
+{"text": "A payment of 49 EUR appears on my statement and I do not recognise it. Please refund the amount.", "team": "billing", "urgent": false, "refund": true, "id": 15}
+{"text": "The checkout page returns a 500 error on order 1005. I am requesting a full refund. Please answer within a few hours, I travel tonight.", "team": "engineering", "urgent": true, "refund": true, "id": 16}
+{"text": "We want to upgrade our plan before the end of the month. I need this solved today.", "team": "sales", "urgent": true, "refund": false, "id": 17}
+{"text": "I was charged twice for order 4768. Please just fix it.", "team": "billing", "urgent": false, "refund": false, "id": 18}
+{"text": "The API has been timing out since this morning. I am requesting a full refund. This blocks our launch tomorrow morning.", "team": "engineering", "urgent": true, "refund": true, "id": 19}
+{"text": "What is the difference between the Pro and Team plans? This blocks our launch tomorrow morning.", "team": "sales", "urgent": true, "refund": false, "id": 20}
+{"text": "A payment of 49 EUR appears on my statement and I do not recognise it. I am requesting a full refund. This blocks our launch tomorrow morning.", "team": "billing", "urgent": true, "refund": true, "id": 21}
+{"text": "The checkout page returns a 500 error on order 5051. I do not want a refund, I only want this resolved. This blocks our launch tomorrow morning.", "team": "engineering", "urgent": true, "refund": false, "id": 22}
+{"text": "I would like a quote for 200 seats. Please refund the amount. No rush, whenever you have time.", "team": "sales", "urgent": false, "refund": true, "id": 23}
+{"text": "The subscription fee was taken after I cancelled. I want my money back. There is no deadline on my side.", "team": "billing", "urgent": false, "refund": true, "id": 24}
+{"text": "The checkout page returns a 500 error on order 5207. I am requesting a full refund. Take your time.", "team": "engineering", "urgent": false, "refund": true, "id": 25}
+{"text": "Do you offer a discount for non-profits? There is no deadline on my side.", "team": "sales", "urgent": false, "refund": false, "id": 26}
+{"text": "I was charged twice for order 4637. I am requesting a full refund. Take your time.", "team": "billing", "urgent": false, "refund": true, "id": 27}
+{"text": "The checkout page returns a 500 error on order 7660. I do not want a refund, I only want this resolved. Take your time.", "team": "engineering", "urgent": false, "refund": false, "id": 28}
+{"text": "I would like a quote for 200 seats.", "team": "sales", "urgent": false, "refund": false, "id": 29}
+{"text": "I was charged twice for order 7985. No rush, whenever you have time.", "team": "billing", "urgent": false, "refund": false, "id": 30}
+{"text": "The checkout page returns a 500 error on order 1000. Please just fix it. No rush, whenever you have time.", "team": "engineering", "urgent": false, "refund": false, "id": 31}
+{"text": "What is the difference between the Pro and Team plans? I do not want a refund, I only want this resolved. This blocks our launch tomorrow morning.", "team": "sales", "urgent": true, "refund": false, "id": 32}
+{"text": "I was charged twice for order 5854. Please refund the amount. Take your time.", "team": "billing", "urgent": false, "refund": true, "id": 33}
+{"text": "The checkout page returns a 500 error on order 9984. Please answer within a few hours, I travel tonight.", "team": "engineering", "urgent": true, "refund": false, "id": 34}
+{"text": "I would like a quote for 200 seats. I do not want a refund, I only want this resolved.", "team": "sales", "urgent": false, "refund": false, "id": 35}
+{"text": "The subscription fee was taken after I cancelled. I want my money back. I need this solved today.", "team": "billing", "urgent": true, "refund": true, "id": 36}
+{"text": "The API has been timing out since this morning. I do not want a refund, I only want this resolved. I need this solved today.", "team": "engineering", "urgent": true, "refund": false, "id": 37}
+{"text": "Do you offer a discount for non-profits? I am requesting a full refund.", "team": "sales", "urgent": false, "refund": true, "id": 38}
+{"text": "A payment of 49 EUR appears on my statement and I do not recognise it. Please refund the amount.", "team": "billing", "urgent": false, "refund": true, "id": 39}
+{"text": "I cannot log in and the reset email never arrives. Please refund the amount. There is no deadline on my side.", "team": "engineering", "urgent": false, "refund": true, "id": 40}
+{"text": "I would like a quote for 200 seats.", "team": "sales", "urgent": false, "refund": false, "id": 41}
+{"text": "I was charged twice for order 4107. Please just fix it.", "team": "billing", "urgent": false, "refund": false, "id": 42}
+{"text": "The checkout page returns a 500 error on order 2218. Please answer within a few hours, I travel tonight.", "team": "engineering", "urgent": true, "refund": false, "id": 43}
+{"text": "Do you offer a discount for non-profits? Please just fix it. This blocks our launch tomorrow morning.", "team": "sales", "urgent": true, "refund": false, "id": 44}
+{"text": "The subscription fee was taken after I cancelled. Please just fix it. I need this solved today.", "team": "billing", "urgent": true, "refund": false, "id": 45}
+{"text": "The mobile app crashes when I open my cart. I do not want a refund, I only want this resolved. This blocks our launch tomorrow morning.", "team": "engineering", "urgent": true, "refund": false, "id": 46}
+{"text": "I would like a quote for 200 seats. I do not want a refund, I only want this resolved. Take your time.", "team": "sales", "urgent": false, "refund": false, "id": 47}
+{"text": "Invoice 3152 shows the wrong amount. Please refund the amount. There is no deadline on my side.", "team": "billing", "urgent": false, "refund": true, "id": 48}
+{"text": "The mobile app crashes when I open my cart. I want my money back.", "team": "engineering", "urgent": false, "refund": true, "id": 49}
+{"text": "We want to upgrade our plan before the end of the month. Please just fix it. There is no deadline on my side.", "team": "sales", "urgent": false, "refund": false, "id": 50}
+{"text": "The subscription fee was taken after I cancelled. I do not want a refund, I only want this resolved. No rush, whenever you have time.", "team": "billing", "urgent": false, "refund": false, "id": 51}
+{"text": "The API has been timing out since this morning. I want my money back. I need this solved today.", "team": "engineering", "urgent": true, "refund": true, "id": 52}
+{"text": "What is the difference between the Pro and Team plans? Please just fix it.", "team": "sales", "urgent": false, "refund": false, "id": 53}
+{"text": "I was charged twice for order 8183. I am requesting a full refund. I need this solved today.", "team": "billing", "urgent": true, "refund": true, "id": 54}
+{"text": "The mobile app crashes when I open my cart.", "team": "engineering", "urgent": false, "refund": false, "id": 55}
+{"text": "Do you offer a discount for non-profits? There is no deadline on my side.", "team": "sales", "urgent": false, "refund": false, "id": 56}
+{"text": "A payment of 49 EUR appears on my statement and I do not recognise it. Please answer within a few hours, I travel tonight.", "team": "billing", "urgent": true, "refund": false, "id": 57}
+{"text": "The mobile app crashes when I open my cart. There is no deadline on my side.", "team": "engineering", "urgent": false, "refund": false, "id": 58}
+{"text": "Do you offer a discount for non-profits? Please answer within a few hours, I travel tonight.", "team": "sales", "urgent": true, "refund": false, "id": 59}
+{"text": "The subscription fee was taken after I cancelled. Please just fix it. Take your time.", "team": "billing", "urgent": false, "refund": false, "id": 60}
+{"text": "The checkout page returns a 500 error on order 6807. Please refund the amount. Please answer within a few hours, I travel tonight.", "team": "engineering", "urgent": true, "refund": true, "id": 61}
+{"text": "I would like a quote for 200 seats. I want my money back. I need this solved today.", "team": "sales", "urgent": true, "refund": true, "id": 62}
+{"text": "Invoice 5607 shows the wrong amount. I want my money back. I need this solved today.", "team": "billing", "urgent": true, "refund": true, "id": 63}
+{"text": "I cannot log in and the reset email never arrives. I do not want a refund, I only want this resolved. I need this solved today.", "team": "engineering", "urgent": true, "refund": false, "id": 64}
+{"text": "Do you offer a discount for non-profits? I do not want a refund, I only want this resolved. Take your time.", "team": "sales", "urgent": false, "refund": false, "id": 65}
+{"text": "Invoice 3785 shows the wrong amount. Take your time.", "team": "billing", "urgent": false, "refund": false, "id": 66}
+{"text": "The mobile app crashes when I open my cart. This blocks our launch tomorrow morning.", "team": "engineering", "urgent": true, "refund": false, "id": 67}
+{"text": "I would like a quote for 200 seats. Please just fix it. I need this solved today.", "team": "sales", "urgent": true, "refund": false, "id": 68}
+{"text": "Invoice 6462 shows the wrong amount. There is no deadline on my side.", "team": "billing", "urgent": false, "refund": false, "id": 69}
+{"text": "The mobile app crashes when I open my cart. I am requesting a full refund. This blocks our launch tomorrow morning.", "team": "engineering", "urgent": true, "refund": true, "id": 70}
+{"text": "Do you offer a discount for non-profits? No rush, whenever you have time.", "team": "sales", "urgent": false, "refund": false, "id": 71}
+{"text": "Invoice 5263 shows the wrong amount. Please refund the amount. Please answer within a few hours, I travel tonight.", "team": "billing", "urgent": true, "refund": true, "id": 72}
+{"text": "The checkout page returns a 500 error on order 9088. I do not want a refund, I only want this resolved. No rush, whenever you have time.", "team": "engineering", "urgent": false, "refund": false, "id": 73}
+{"text": "Do you offer a discount for non-profits? Please just fix it. Please answer within a few hours, I travel tonight.", "team": "sales", "urgent": true, "refund": false, "id": 74}
+{"text": "I was charged twice for order 6621. I need this solved today.", "team": "billing", "urgent": true, "refund": false, "id": 75}
+{"text": "The API has been timing out since this morning. I want my money back. Please answer within a few hours, I travel tonight.", "team": "engineering", "urgent": true, "refund": true, "id": 76}
+{"text": "Do you offer a discount for non-profits? This blocks our launch tomorrow morning.", "team": "sales", "urgent": true, "refund": false, "id": 77}
+{"text": "Invoice 9520 shows the wrong amount. I do not want a refund, I only want this resolved. This blocks our launch tomorrow morning.", "team": "billing", "urgent": true, "refund": false, "id": 78}
+{"text": "The API has been timing out since this morning. I am requesting a full refund.", "team": "engineering", "urgent": false, "refund": true, "id": 79}
+{"text": "We want to upgrade our plan before the end of the month. No rush, whenever you have time.", "team": "sales", "urgent": false, "refund": false, "id": 80}
+{"text": "I was charged twice for order 9094. I do not want a refund, I only want this resolved. Please answer within a few hours, I travel tonight.", "team": "billing", "urgent": true, "refund": false, "id": 81}
+{"text": "The checkout page returns a 500 error on order 1891. Please refund the amount. This blocks our launch tomorrow morning.", "team": "engineering", "urgent": true, "refund": true, "id": 82}
+{"text": "What is the difference between the Pro and Team plans?", "team": "sales", "urgent": false, "refund": false, "id": 83}
+{"text": "I was charged twice for order 6375. I want my money back. I need this solved today.", "team": "billing", "urgent": true, "refund": true, "id": 84}
+{"text": "The checkout page returns a 500 error on order 2748. I am requesting a full refund. No rush, whenever you have time.", "team": "engineering", "urgent": false, "refund": true, "id": 85}
+{"text": "What is the difference between the Pro and Team plans? No rush, whenever you have time.", "team": "sales", "urgent": false, "refund": false, "id": 86}
+{"text": "A payment of 49 EUR appears on my statement and I do not recognise it. Please answer within a few hours, I travel tonight.", "team": "billing", "urgent": true, "refund": false, "id": 87}
+{"text": "The checkout page returns a 500 error on order 1415. Please refund the amount.", "team": "engineering", "urgent": false, "refund": true, "id": 88}
+{"text": "What is the difference between the Pro and Team plans? Please just fix it. This blocks our launch tomorrow morning.", "team": "sales", "urgent": true, "refund": false, "id": 89}
+{"text": "Invoice 8656 shows the wrong amount. Please just fix it. I need this solved today.", "team": "billing", "urgent": true, "refund": false, "id": 90}
+{"text": "I cannot log in and the reset email never arrives. This blocks our launch tomorrow morning.", "team": "engineering", "urgent": true, "refund": false, "id": 91}
+{"text": "What is the difference between the Pro and Team plans? Take your time.", "team": "sales", "urgent": false, "refund": false, "id": 92}
+{"text": "I was charged twice for order 7380. I want my money back.", "team": "billing", "urgent": false, "refund": true, "id": 93}
+{"text": "I cannot log in and the reset email never arrives. Please just fix it. This blocks our launch tomorrow morning.", "team": "engineering", "urgent": true, "refund": false, "id": 94}
+{"text": "I would like a quote for 200 seats.", "team": "sales", "urgent": false, "refund": false, "id": 95}
+{"text": "I was charged twice for order 9971. No rush, whenever you have time.", "team": "billing", "urgent": false, "refund": false, "id": 96}
+{"text": "The mobile app crashes when I open my cart. I do not want a refund, I only want this resolved. This blocks our launch tomorrow morning.", "team": "engineering", "urgent": true, "refund": false, "id": 97}
+{"text": "We want to upgrade our plan before the end of the month. No rush, whenever you have time.", "team": "sales", "urgent": false, "refund": false, "id": 98}
+{"text": "A payment of 49 EUR appears on my statement and I do not recognise it. This blocks our launch tomorrow morning.", "team": "billing", "urgent": true, "refund": false, "id": 99}
+{"text": "I do not want a refund, I want the double charge on order 5521 explained. Next week is fine.", "team": "billing", "urgent": false, "refund": false, "hard": true, "id": 100}
+{"text": "The refund you promised last month has still not arrived, and the bank closes my account tomorrow.", "team": "billing", "urgent": true, "refund": true, "hard": true, "id": 101}
+{"text": "Our checkout is down right now and we are losing sales every minute.", "team": "engineering", "urgent": true, "refund": false, "hard": true, "id": 102}
+{"text": "Could your engineers look at the slow dashboard when they get a chance? No refund needed.", "team": "engineering", "urgent": false, "refund": false, "hard": true, "id": 103}
+{"text": "We were overcharged, please credit it back to our card.", "team": "billing", "urgent": false, "refund": true, "hard": true, "id": 104}
+{"text": "Quote needed for 50 seats; the board votes this afternoon.", "team": "sales", "urgent": true, "refund": false, "hard": true, "id": 105}
+{"text": "Upgrade request: we would like the Team plan from next quarter.", "team": "sales", "urgent": false, "refund": false, "hard": true, "id": 106}
+{"text": "Thanks for the great service! Just confirming that our March invoice was paid.", "team": "billing", "urgent": false, "refund": false, "hard": true, "id": 107}
+{"text": "The app crashes at payment. I want to cancel the order and get my money back, immediately.", "team": "engineering", "urgent": true, "refund": true, "hard": true, "id": 108}
+{"text": "Wrong amount on invoice 88, my accountant needs the corrected one by end of day.", "team": "billing", "urgent": true, "refund": false, "hard": true, "id": 109}
+{"text": "I would like to return the product and get a refund; there is no hurry.", "team": "billing", "urgent": false, "refund": true, "hard": true, "id": 110}
+{"text": "The API key stopped working during a demo to our client in 30 minutes.", "team": "engineering", "urgent": true, "refund": false, "hard": true, "id": 111}
+{"text": "Do you have a student discount? I am not in a hurry.", "team": "sales", "urgent": false, "refund": false, "hard": true, "id": 112}
+{"text": "Please cancel my subscription and refund this month; I noticed it only today.", "team": "billing", "urgent": false, "refund": true, "hard": true, "id": 113}
+{"text": "The reset email never arrives and I am locked out before tomorrow's audit.", "team": "engineering", "urgent": true, "refund": false, "hard": true, "id": 114}
+{"text": "Interested in your enterprise offer, can someone call me this week?", "team": "sales", "urgent": false, "refund": false, "hard": true, "id": 115}
+{"text": "You charged my card 3 times! Fix this now and refund two of them.", "team": "billing", "urgent": true, "refund": true, "hard": true, "id": 116}
+{"text": "The export button does nothing since the last update.", "team": "engineering", "urgent": false, "refund": false, "hard": true, "id": 117}
+{"text": "We need an urgent contract amendment before the signing at 5 pm.", "team": "sales", "urgent": true, "refund": false, "hard": true, "id": 118}
+{"text": "I got a refund for the wrong order; please correct it, no rush.", "team": "billing", "urgent": false, "refund": false, "hard": true, "id": 119}
