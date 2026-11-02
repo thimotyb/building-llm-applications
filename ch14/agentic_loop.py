@@ -32,7 +32,8 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
 
 from harness import CASE_DIR, run_harness
-from judge import Judge, LLMJudge, Noul
+from judge import Judge, Noul
+from judge_factory import make_judge
 from llm_factory import ModelSpec, complete, resolve_model
 
 GenerateFn = Callable[[str, str, str], tuple[str, float]]  # (spec, current_code, feedback) -> (code, cost)
@@ -221,9 +222,10 @@ def main() -> None:
     parser.add_argument("--out", type=Path, help="write the final payment_retry.py here")
     args = parser.parse_args()
 
-    worker, judge_spec = resolve_model(), resolve_model(role="judge")
-    print(f"worker={worker.label}  judge={judge_spec.label}  max_iters={args.max_iters}")
-    graph = build_graph(llm_generate(worker), LLMJudge(judge_spec, samples=args.judge_samples))
+    worker = resolve_model()
+    judge = make_judge(samples=args.judge_samples)
+    print(f"worker={worker.label}  judge_backend={type(judge).__name__}  max_iters={args.max_iters}")
+    graph = build_graph(llm_generate(worker), judge)
     final = run(graph, (CASE_DIR / "spec.md").read_text(), (CASE_DIR / "payment_retry.py").read_text(),
                 args.max_iters, args.human)
     print(f"\nstatus={final['status']}  iterations={final['iteration']}  cost=${final['cost_usd']:.4f}")

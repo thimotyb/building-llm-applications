@@ -7,15 +7,18 @@ Usage:
 
 import argparse
 
-from judge import Choice, LLMJudge, Noul, decide
-from llm_factory import resolve_model
+from judge import Choice, Noul, decide
+from judge_factory import make_judge
 
 TICKET = (
     "Customer writes: 'My card was charged twice for order 4471 and the checkout page now "
     "returns a 500 error. I need this fixed today, I am travelling tomorrow.'"
 )
 QUESTIONS = [
-    Choice(id="team", prompt="Which team should handle this ticket?", options=["billing", "engineering", "sales"]),
+    Choice(
+        id="team", prompt="Which team should handle this ticket?", options=["billing", "engineering", "sales"],
+        descriptions={"billing": "Charges, refunds, invoices", "engineering": "Errors, outages, bugs", "sales": "Quotes, plans, upgrades"},
+    ),
     Noul(id="urgent", prompt="Does the customer need a resolution within 24 hours?"),
     Noul(id="refund", prompt="Is a refund explicitly requested?"),
 ]
@@ -26,8 +29,7 @@ def main() -> None:
     parser.add_argument("--samples", type=int, default=1)
     args = parser.parse_args()
 
-    spec = resolve_model(role="judge")
-    verdict = LLMJudge(spec, samples=args.samples).judge(TICKET, QUESTIONS)
+    verdict = make_judge(samples=args.samples).judge(TICKET, QUESTIONS)
     print(f"backend={verdict.backend}  latency={verdict.latency_s:.2f}s  cost=${verdict.cost_usd:.5f}")
     for qid, answer in verdict.answers.items():
         probs = {k: round(v, 2) for k, v in answer.probabilities.items()}

@@ -31,6 +31,7 @@ class Choice(BaseModel):
     id: str
     prompt: str
     options: list[str] = Field(min_length=2)
+    descriptions: dict[str, str] | None = None  # option -> what it means (used by decision-model backends)
 
 
 class Noul(BaseModel):
@@ -49,6 +50,7 @@ class Score(BaseModel):
     prompt: str
     low: float = 0.0
     high: float = 1.0
+    levels: list[str] | None = None  # ordered level descriptions, lowest first (decision-model backends)
 
 
 Question = Choice | Noul | Score
