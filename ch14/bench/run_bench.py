@@ -51,7 +51,7 @@ def run_judge(judge, items: list[dict], workers: int, label: str = "run", resume
                     "refund": v["refund"].probabilities.get("true", 0.5),
                 }
             except Exception as exc:  # keep going; failures are reported, not hidden
-                err = f"{type(exc).__name__}: {exc}"[:200]
+                err = f"{type(exc).__name__}: {exc}"[:600]
         return {"id": item["id"], "latency": 0.0, "cost": 0.0, "error": err}
 
     start = time.perf_counter()

@@ -154,6 +154,7 @@ class LLMJudge:
             response_format={"type": "json_object"},
         )
         text = response.choices[0].message.content or "{}"
+        self.last_raw = text  # kept for diagnostics when a question is left unanswered
         try:
             import litellm
 
@@ -184,7 +185,10 @@ class LLMJudge:
         for q in questions:
             parsed = [_parse_answer(q, run[q.id]) for run in runs if q.id in run]
             if not parsed:
-                raise ValueError(f"The judge returned no answer for question '{q.id}'.")
+                raise ValueError(
+                    f"The judge returned no answer for question '{q.id}'. "
+                    f"Last raw reply: {getattr(self, 'last_raw', '')[:300]!r}"
+                )
             result[q.id] = parsed[0] if len(parsed) == 1 else _aggregate(q, parsed)
         return Verdict(result, time.perf_counter() - start, total_cost, self.spec.label)
 
