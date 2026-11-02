@@ -1,0 +1,633 @@
+{
+ "meta": {
+  "label": "gemma-12b",
+  "backend": "llm",
+  "n": 49,
+  "note": "PARTIAL: 49 of 120 tickets, 2 failed (counted as errors)"
+ },
+ "rows": [
+  {
+   "id": 0,
+   "latency": 17.970210743000052,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.04,
+    "sales": 0.01
+   },
+   "urgent": 0.98,
+   "refund": 0.0
+  },
+  {
+   "id": 1,
+   "latency": 15.571817967000015,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.05,
+    "engineering": 0.95,
+    "sales": 0.0
+   },
+   "urgent": 0.9,
+   "refund": 0.0
+  },
+  {
+   "id": 2,
+   "latency": 7.831020339000133,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.8,
+   "refund": 0.0
+  },
+  {
+   "id": 3,
+   "latency": 11.633774199999834,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.98,
+   "refund": 0.01
+  },
+  {
+   "id": 4,
+   "latency": 16.687440439000056,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.05,
+    "engineering": 0.95,
+    "sales": 0.0
+   },
+   "urgent": 0.98,
+   "refund": 1.0
+  },
+  {
+   "id": 5,
+   "latency": 12.511662413000067,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.9134615384615384,
+    "engineering": 0.04807692307692308,
+    "sales": 0.038461538461538464
+   },
+   "urgent": 0.95,
+   "refund": 0.0
+  },
+  {
+   "id": 6,
+   "latency": 7.586324931999798,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.8,
+   "refund": 1.0
+  },
+  {
+   "id": 7,
+   "latency": 30.963292060999947,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.9,
+    "engineering": 0.1,
+    "sales": 0.0
+   },
+   "urgent": 0.8,
+   "refund": 1.0
+  },
+  {
+   "id": 8,
+   "latency": 12.283777100999941,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.1,
+    "engineering": 0.05,
+    "sales": 0.85
+   },
+   "urgent": 0.1,
+   "refund": 0.0
+  },
+  {
+   "id": 9,
+   "latency": 11.979480463999835,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.05,
+    "sales": 0.0
+   },
+   "urgent": 0.98,
+   "refund": 0.0
+  },
+  {
+   "id": 10,
+   "latency": 11.84097098999996,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.05,
+    "engineering": 0.95,
+    "sales": 0.0
+   },
+   "urgent": 0.98,
+   "refund": 0.02
+  },
+  {
+   "id": 12,
+   "latency": 26.763798915000052,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.98,
+   "refund": 0.01
+  },
+  {
+   "id": 13,
+   "latency": 7.052949790999946,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.05,
+    "engineering": 0.95,
+    "sales": 0.0
+   },
+   "urgent": 0.1,
+   "refund": 0.0
+  },
+  {
+   "id": 14,
+   "latency": 14.374238805000005,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.98,
+   "refund": 0.01
+  },
+  {
+   "id": 15,
+   "latency": 12.41955340200002,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.1,
+   "refund": 0.98
+  },
+  {
+   "id": 16,
+   "latency": 29.350282424999932,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.1,
+    "engineering": 0.85,
+    "sales": 0.05
+   },
+   "urgent": 0.95,
+   "refund": 1.0
+  },
+  {
+   "id": 17,
+   "latency": 11.066756251000015,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.98,
+   "refund": 0.01
+  },
+  {
+   "id": 18,
+   "latency": 32.86480717999984,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.05,
+    "sales": 0.0
+   },
+   "urgent": 0.8,
+   "refund": 0.9
+  },
+  {
+   "id": 19,
+   "latency": 34.9925896929999,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.05,
+    "engineering": 0.95,
+    "sales": 0.0
+   },
+   "urgent": 0.98,
+   "refund": 1.0
+  },
+  {
+   "id": 20,
+   "latency": 10.903482938000025,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.98,
+   "refund": 0.0
+  },
+  {
+   "id": 21,
+   "latency": 20.55061307799997,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.05,
+    "sales": 0.0
+   },
+   "urgent": 0.98,
+   "refund": 1.0
+  },
+  {
+   "id": 22,
+   "latency": 12.936782777999952,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.09090909090909091,
+    "engineering": 0.7727272727272726,
+    "sales": 0.13636363636363635
+   },
+   "urgent": 0.95,
+   "refund": 0.05
+  },
+  {
+   "id": 23,
+   "latency": 59.90103096400003,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.1,
+    "engineering": 0.05,
+    "sales": 0.85
+   },
+   "urgent": 0.1,
+   "refund": 1.0
+  },
+  {
+   "id": 24,
+   "latency": 6.788887705999969,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.05,
+    "sales": 0.0
+   },
+   "urgent": 0.3,
+   "refund": 1.0
+  },
+  {
+   "id": 25,
+   "latency": 18.43306716899997,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.13043478260869565,
+    "engineering": 0.8260869565217391,
+    "sales": 0.04347826086956522
+   },
+   "urgent": 0.8,
+   "refund": 1.0
+  },
+  {
+   "id": 26,
+   "latency": 12.864217553000117,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.958627648839556,
+    "engineering": 0.0010090817356205853,
+    "sales": 0.04036326942482341
+   },
+   "urgent": 0.1,
+   "refund": 0.0
+  },
+  {
+   "id": 27,
+   "latency": 6.588846060000151,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.05,
+    "sales": 0.0
+   },
+   "urgent": 0.1,
+   "refund": 1.0
+  },
+  {
+   "id": 28,
+   "latency": 7.120670329999939,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.13043478260869565,
+    "engineering": 0.8260869565217391,
+    "sales": 0.04347826086956522
+   },
+   "urgent": 0.3,
+   "refund": 0.0
+  },
+  {
+   "id": 29,
+   "latency": 12.066041230999872,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.1,
+    "engineering": 0.05,
+    "sales": 0.85
+   },
+   "urgent": 0.2,
+   "refund": 0.0
+  },
+  {
+   "id": 30,
+   "latency": 26.910407818000067,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.05,
+    "sales": 0.0
+   },
+   "urgent": 0.1,
+   "refund": 0.8
+  },
+  {
+   "id": 31,
+   "latency": 7.678027021999924,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.09523809523809523,
+    "engineering": 0.8571428571428571,
+    "sales": 0.047619047619047616
+   },
+   "urgent": 0.1,
+   "refund": 0.0
+  },
+  {
+   "id": 32,
+   "latency": 21.6870505710001,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.05,
+    "sales": 0.0
+   },
+   "urgent": 0.98,
+   "refund": 0.02
+  },
+  {
+   "id": 33,
+   "latency": 21.167733764000104,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.1,
+   "refund": 1.0
+  },
+  {
+   "id": 34,
+   "latency": 13.332257633000154,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.09090909090909091,
+    "engineering": 0.7727272727272726,
+    "sales": 0.13636363636363635
+   },
+   "urgent": 0.95,
+   "refund": 0.0
+  },
+  {
+   "id": 36,
+   "latency": 10.440143172000035,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.98,
+   "refund": 1.0
+  },
+  {
+   "id": 37,
+   "latency": 11.629824896999935,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.05,
+    "engineering": 0.95,
+    "sales": 0.0
+   },
+   "urgent": 0.98,
+   "refund": 0.02
+  },
+  {
+   "id": 38,
+   "latency": 8.474035706999985,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.01,
+    "sales": 0.04
+   },
+   "urgent": 0.3,
+   "refund": 1.0
+  },
+  {
+   "id": 39,
+   "latency": 11.910066166999968,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.1,
+   "refund": 0.98
+  },
+  {
+   "id": 40,
+   "latency": 21.452666434000093,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.9,
+    "engineering": 0.1,
+    "sales": 0.0
+   },
+   "urgent": 0.2,
+   "refund": 1.0
+  },
+  {
+   "id": 41,
+   "latency": 11.83139471100003,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.1,
+    "engineering": 0.05,
+    "sales": 0.85
+   },
+   "urgent": 0.2,
+   "refund": 0.0
+  },
+  {
+   "id": 42,
+   "latency": 19.4732241669999,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.05,
+    "sales": 0.0
+   },
+   "urgent": 0.7,
+   "refund": 0.8
+  },
+  {
+   "id": 43,
+   "latency": 10.070158187000061,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.09090909090909091,
+    "engineering": 0.7727272727272726,
+    "sales": 0.13636363636363635
+   },
+   "urgent": 0.95,
+   "refund": 0.0
+  },
+  {
+   "id": 44,
+   "latency": 13.659687609000002,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.98,
+   "refund": 0.01
+  },
+  {
+   "id": 45,
+   "latency": 21.421846244000108,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.02,
+    "sales": 0.03
+   },
+   "urgent": 0.98,
+   "refund": 0.01
+  },
+  {
+   "id": 46,
+   "latency": 6.680580533000011,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.05,
+    "engineering": 0.95,
+    "sales": 0.0
+   },
+   "urgent": 0.98,
+   "refund": 0.02
+  },
+  {
+   "id": 47,
+   "latency": 12.392196156999944,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.038461538461538464,
+    "engineering": 0.04807692307692308,
+    "sales": 0.9134615384615384
+   },
+   "urgent": 0.1,
+   "refund": 0.0
+  },
+  {
+   "id": 48,
+   "latency": 11.323232225000083,
+   "cost": 0.0,
+   "error": null,
+   "team": {
+    "billing": 0.95,
+    "engineering": 0.05,
+    "sales": 0.0
+   },
+   "urgent": 0.1,
+   "refund": 1.0
+  },
+  {
+   "id": 11,
+   "latency": 0.0,
+   "cost": 0.0,
+   "error": "ValueError: The judge returned no answer for question 'refund'."
+  },
+  {
+   "id": 35,
+   "latency": 0.0,
+   "cost": 0.0,
+   "error": "ValueError: The judge returned no answer for question 'refund'."
+  }
+ ]
+}
