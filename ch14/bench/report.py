@@ -66,10 +66,19 @@ def task_metrics(task: str, rows: list[dict], items: dict[int, dict]) -> dict:
 def build_table() -> str:
     items = {i["id"]: i for i in dataset.load()}
     out = []
-    files = sorted(RESULTS.glob("*.json"))
+    files = sorted(f for f in RESULTS.glob("*.json") if not f.name.endswith(".partial.json"))
     if not files:
         return "No results yet: run bench/run_bench.py first."
     loaded = [json.loads(f.read_text()) for f in files]
+    # Fair comparison: when some runs are partial, evaluate every backend on the tickets ALL of them attempted
+    common = set.intersection(*[{row["id"] for row in res["rows"]} for res in loaded])
+    if len(common) < max(res["meta"]["n"] for res in loaded):
+        for res in loaded:
+            res["rows"] = [row for row in res["rows"] if row["id"] in common]
+            res["meta"]["n"] = len(res["rows"])
+        out.append(f"\n> Partial runs present: all backends are compared on the same {len(common)} tickets "
+                   f"(ids {min(common)}..{max(common)}). Failed tickets are excluded from the accuracy columns "
+                   "and counted in the errors column.\n")
     for task in TASKS:
         out += [f"\n### {task}\n", "| backend | n | acc | ECE | Brier | conf | acc@c | cov@c |", "|---|---|---|---|---|---|---|---|"]
         for res in loaded:

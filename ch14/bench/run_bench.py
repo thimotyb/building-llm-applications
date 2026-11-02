@@ -107,7 +107,18 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--samples", type=int, default=1)
     parser.add_argument("--resume", action="store_true", help="reuse tickets already stored in <label>.partial.json")
+    parser.add_argument("--finalize", action="store_true",
+                        help="turn <label>.partial.json into <label>.json as-is (no model calls), for an interrupted run")
     args = parser.parse_args()
+
+    if args.finalize:
+        rows = json.loads((RESULTS / f"{args.label}.partial.json").read_text())
+        bad = sum(1 for r in rows if r.get("error"))
+        meta = {"label": args.label, "backend": args.backend, "n": len(rows),
+                "note": f"PARTIAL: {len(rows)} of {len(dataset.load())} tickets, {bad} failed (counted as errors)"}
+        (RESULTS / f"{args.label}.json").write_text(json.dumps({"meta": meta, "rows": rows}, indent=1))
+        print(f"{args.label}: finalized {len(rows)} tickets ({bad} errors) -> {args.label}.json")
+        return
 
     items = dataset.load()[: args.limit or None]
     meta: dict = {"label": args.label, "backend": args.backend, "n": len(items)}
