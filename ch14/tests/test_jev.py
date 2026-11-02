@@ -78,3 +78,24 @@ def test_factory_selects_backend_and_falls_back(monkeypatch):
     monkeypatch.setenv("JUDGE_FALLBACK", "llm")
     monkeypatch.setenv("LLM_FALLBACK_OLLAMA", "1")
     assert type(make_judge()).__name__ == "LLMJudge"
+
+
+def test_opendecider_backend_reuses_the_shared_schema():
+    from opendecider_judge import OpenDeciderJudge
+
+    seen = {}
+
+    class FakeModel:
+        def system_one(self, state, questions):
+            seen["questions"] = questions
+            return {"answers": {
+                "urgent": {"type": "noul", "noul": 0.2},
+                "team": {"type": "choice", "choice": "billing", "probabilities": {"billing": 0.7, "engineering": 0.3}},
+                "quality": {"type": "score", "probabilities": {"0": 0.5, "4": 0.5}},
+            }}
+
+    verdict = OpenDeciderJudge("fake", model=FakeModel()).judge("s", QUESTIONS)
+    assert seen["questions"]["team"]["criteria"] == {"billing": "money", "engineering": "bugs"}
+    assert verdict["urgent"].value is False and verdict["team"].value == "billing"
+    assert verdict["quality"].value == pytest.approx(5.0)  # expected level 2 of 0..4 -> 5 on 0..10
+    assert verdict.cost_usd == 0.0 and verdict.backend == "fake"

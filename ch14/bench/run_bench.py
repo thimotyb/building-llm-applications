@@ -3,6 +3,7 @@
     python bench/run_bench.py --backend jev     --label jev-1.14.0
     python bench/run_bench.py --backend llm     --label deepseek      (LLM_PROVIDER / JUDGE_PROVIDER from .env)
     python bench/run_bench.py --backend llm     --label gemma-12b     LLM_PROVIDER=ollama OLLAMA_MODEL=...
+    OPENDECIDER_MODEL=manjunathshiva/opendecider-small python bench/run_bench.py --backend opendecider --label opendecider-small
     python bench/run_bench.py --backend xgboost --label xgboost-tfidf
 Results go to bench/results/<label>.json; build the table with bench/report.py.
 """
@@ -80,7 +81,7 @@ def run_xgboost(items: list[dict]) -> tuple[list[dict], float, float]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--backend", choices=["jev", "llm", "xgboost"], required=True)
+    parser.add_argument("--backend", choices=["jev", "llm", "opendecider", "xgboost"], required=True)
     parser.add_argument("--label", required=True)
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--workers", type=int, default=8)
@@ -95,12 +96,12 @@ def main() -> None:
     else:
         import os
 
-        os.environ["JUDGE_BACKEND"] = "jev" if args.backend == "jev" else "llm"
+        os.environ["JUDGE_BACKEND"] = args.backend
         from judge_factory import make_judge
 
         judge = make_judge(samples=args.samples)
-        meta["model"] = getattr(judge, "model", None) or judge.spec.label
-        rows, wall, _ = run_judge(judge, items, 1 if args.backend == "llm" and meta["model"].startswith("ollama") else args.workers)
+        meta["model"] = getattr(judge, "model_id", None) or getattr(judge, "model", None) or judge.spec.label
+        rows, wall, _ = run_judge(judge, items, 1 if args.backend == "opendecider" or str(meta["model"]).startswith("ollama") else args.workers)
     meta["wall_seconds"] = round(wall, 2)
     RESULTS.mkdir(exist_ok=True)
     (RESULTS / f"{args.label}.json").write_text(json.dumps({"meta": meta, "rows": rows}, indent=1))
