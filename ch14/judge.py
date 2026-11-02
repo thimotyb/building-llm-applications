@@ -169,8 +169,16 @@ class LLMJudge:
         runs, total_cost = [], 0.0
         for _ in range(self.samples):
             answers, cost = self._ask(state, questions)
-            runs.append(answers)
             total_cost += cost
+            # Small models sometimes skip a question: ask again for the missing ones only (smaller prompt)
+            for _retry in range(2):
+                missing = [q for q in questions if q.id not in answers]
+                if not missing:
+                    break
+                extra, cost = self._ask(state, missing)
+                answers = {**answers, **extra}
+                total_cost += cost
+            runs.append(answers)
 
         result: dict[str, Answer] = {}
         for q in questions:

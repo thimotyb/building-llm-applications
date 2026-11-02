@@ -106,3 +106,24 @@ def test_fake_judge_is_deterministic():
     answers = {"urgent": Answer("urgent", True, {"true": 0.95, "false": 0.05})}
     verdict = FakeJudge(answers).judge("s", [QUESTIONS[1]])
     assert verdict["urgent"].confidence == 0.95
+
+
+def test_missing_question_is_asked_again_alone(monkeypatch):
+    calls = []
+
+    def fake(messages, *a, **k):
+        calls.append(messages[-1]["content"])
+        if len(calls) == 1:  # first reply forgets "quality" and "urgent"
+            return _fake_completion('{"answers": {"route": {"option": "tech", "probabilities": {"tech": 1}}}}')
+        return _fake_completion('{"answers": {"urgent": {"p_true": 0.2}, "quality": 3}}')
+
+    monkeypatch.setattr(judge_mod, "complete", fake)
+    verdict = LLMJudge(llm_factory.resolve_model()).judge("state", QUESTIONS)
+    assert len(calls) == 2 and "route" not in calls[1].split("QUESTIONS:")[1]
+    assert verdict["urgent"].value is False and verdict["quality"].value == 3
+
+
+def test_still_missing_after_retries_raises(monkeypatch):
+    monkeypatch.setattr(judge_mod, "complete", lambda *a, **k: _fake_completion('{"answers": {}}'))
+    with pytest.raises(ValueError, match="no answer"):
+        LLMJudge(llm_factory.resolve_model()).judge("s", QUESTIONS)
