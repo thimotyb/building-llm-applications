@@ -31,8 +31,17 @@ QUESTIONS = [
 ]
 
 
-def run_judge(judge, items: list[dict], workers: int) -> tuple[list[dict], float, float]:
+def run_judge(judge, items: list[dict], workers: int, label: str = "run", resume: bool = False) -> tuple[list[dict], float, float]:
+    """Judge every ticket with live progress; partial results are saved so a long run can be resumed."""
+    partial = RESULTS / f"{label}.partial.json"
+    done: dict[int, dict] = {}
+    if resume and partial.exists():
+        done = {r["id"]: r for r in json.loads(partial.read_text()) if not r.get("error")}
+        print(f"[{label}] resuming: {len(done)} tickets already done", flush=True)
+    todo = [i for i in items if i["id"] not in done]
+
     def one(item):
+        err = ""
         for attempt in range(2):
             try:
                 v = judge.judge(item["text"], QUESTIONS)
@@ -46,8 +55,19 @@ def run_judge(judge, items: list[dict], workers: int) -> tuple[list[dict], float
         return {"id": item["id"], "latency": 0.0, "cost": 0.0, "error": err}
 
     start = time.perf_counter()
+    RESULTS.mkdir(exist_ok=True)
+    errors = 0
     with ThreadPoolExecutor(workers) as pool:
-        rows = list(pool.map(one, items))
+        for n, row in enumerate(pool.map(one, todo), 1):
+            done[row["id"]] = row
+            errors += bool(row["error"])
+            elapsed = time.perf_counter() - start
+            eta = elapsed / n * (len(todo) - n)
+            status = f"ERROR {row['error']}" if row["error"] else f"{row['latency']:.1f}s"
+            print(f"[{label}] {n}/{len(todo)}  ticket {row['id']}  {status}  elapsed {elapsed:.0f}s  "
+                  f"ETA {eta:.0f}s  errors {errors}", flush=True)
+            partial.write_text(json.dumps(list(done.values())))
+    rows = [done[i["id"]] for i in items]
     return rows, time.perf_counter() - start, 0.0
 
 
@@ -86,6 +106,7 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--samples", type=int, default=1)
+    parser.add_argument("--resume", action="store_true", help="reuse tickets already stored in <label>.partial.json")
     args = parser.parse_args()
 
     items = dataset.load()[: args.limit or None]
@@ -101,7 +122,8 @@ def main() -> None:
 
         judge = make_judge(samples=args.samples)
         meta["model"] = getattr(judge, "model_id", None) or getattr(judge, "model", None) or judge.spec.label
-        rows, wall, _ = run_judge(judge, items, 1 if args.backend == "opendecider" or str(meta["model"]).startswith("ollama") else args.workers)
+        workers = 1 if args.backend == "opendecider" or str(meta["model"]).startswith("ollama") else args.workers
+        rows, wall, _ = run_judge(judge, items, workers, args.label, args.resume)
     meta["wall_seconds"] = round(wall, 2)
     RESULTS.mkdir(exist_ok=True)
     (RESULTS / f"{args.label}.json").write_text(json.dumps({"meta": meta, "rows": rows}, indent=1))
