@@ -1,0 +1,4 @@
+litellm>=1.84,!=1.82.7,!=1.82.8
+pydantic>=2,<3
+python-dotenv>=1,<2
+pytest>=8,<10
