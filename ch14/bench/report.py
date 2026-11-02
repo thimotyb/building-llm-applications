@@ -92,8 +92,19 @@ def build_table() -> str:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--md", type=Path)
+    parser.add_argument("--notes", type=Path, help="markdown file with <!-- BENCH:START/END --> markers to refresh")
     args = parser.parse_args()
     table = build_table()
     print(table)
     if args.md:
         args.md.write_text("# Judge benchmark\n" + table + "\n")
+    if args.notes:
+        import re
+
+        text = args.notes.read_text()
+        block = f"<!-- BENCH:START -->\n{table}\n<!-- BENCH:END -->"
+        new, count = re.subn(r"<!-- BENCH:START -->.*?<!-- BENCH:END -->", lambda _: block, text, flags=re.S)
+        if count != 1:
+            raise SystemExit("markers <!-- BENCH:START --> / <!-- BENCH:END --> not found exactly once")
+        args.notes.write_text(new)
+        print(f"\nupdated {args.notes}")
