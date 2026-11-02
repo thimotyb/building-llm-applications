@@ -2,6 +2,7 @@
 
     JUDGE_BACKEND=llm   (default) any LiteLLM model, see llm_factory (JUDGE_PROVIDER / JUDGE_MODEL)
     JUDGE_BACKEND=jev   hosted TypeSafe Jev (TYPESAFE_API_KEY, JEV_MODEL)
+    JUDGE_BACKEND=cascade  Jev first, the LLM judge only on unsure questions (CASCADE_THRESHOLD, default 0.7)
     JUDGE_BACKEND=opendecider  local open decision model (OPENDECIDER_MODEL, see opendecider_judge.py)
     JUDGE_FALLBACK=llm  if Jev is selected but no key/network, fall back to the LLM judge
 """
@@ -24,10 +25,16 @@ def make_judge(samples: int = 1) -> Judge:
         except RuntimeError:
             if os.getenv("JUDGE_FALLBACK", "").lower() != "llm":
                 raise
+    elif backend == "cascade":
+        from jev_judge import JevJudge
+        from router import CascadeJudge
+
+        tiers = [JevJudge(), LLMJudge(resolve_model(role="judge"), samples=samples)]
+        return CascadeJudge(tiers, float(os.getenv("CASCADE_THRESHOLD", "0.7")))
     elif backend == "opendecider":
         from opendecider_judge import OpenDeciderJudge
 
         return OpenDeciderJudge()
     elif backend != "llm":
-        raise RuntimeError(f"Unsupported JUDGE_BACKEND '{backend}'. Use 'llm', 'jev' or 'opendecider'.")
+        raise RuntimeError(f"Unsupported JUDGE_BACKEND '{backend}'. Use 'llm', 'jev', 'cascade' or 'opendecider'.")
     return LLMJudge(resolve_model(role="judge"), samples=samples)

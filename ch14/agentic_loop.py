@@ -35,6 +35,7 @@ from harness import CASE_DIR, run_harness
 from judge import Judge, Noul
 from judge_factory import make_judge
 from llm_factory import ModelSpec, complete, resolve_model
+from router import escalating_generate
 
 GenerateFn = Callable[[str, str, str], tuple[str, float]]  # (spec, current_code, feedback) -> (code, cost)
 
@@ -219,13 +220,20 @@ def main() -> None:
     parser.add_argument("--human", choices=["ask", "approve", "stop"], default="ask")
     parser.add_argument("--max-iters", type=int, default=4)
     parser.add_argument("--judge-samples", type=int, default=1)
+    parser.add_argument("--escalate", action="store_true",
+                        help="after a failed attempt, regenerate with the LARGE_PROVIDER/LARGE_MODEL model")
     parser.add_argument("--out", type=Path, help="write the final payment_retry.py here")
     args = parser.parse_args()
 
     worker = resolve_model()
     judge = make_judge(samples=args.judge_samples)
     print(f"worker={worker.label}  judge_backend={type(judge).__name__}  max_iters={args.max_iters}")
-    graph = build_graph(llm_generate(worker), judge)
+    generate = llm_generate(worker)
+    if args.escalate:
+        large = resolve_model(role="large")
+        print(f"escalation model={large.label}")
+        generate = escalating_generate(generate, llm_generate(large))
+    graph = build_graph(generate, judge)
     final = run(graph, (CASE_DIR / "spec.md").read_text(), (CASE_DIR / "payment_retry.py").read_text(),
                 args.max_iters, args.human)
     print(f"\nstatus={final['status']}  iterations={final['iteration']}  cost=${final['cost_usd']:.4f}")

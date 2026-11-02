@@ -78,6 +78,8 @@ class Verdict:
     latency_s: float = 0.0
     cost_usd: float = 0.0
     backend: str = ""
+    routes: dict[str, str] = field(default_factory=dict)  # question id -> tier that answered (cascade only)
+    needs_human: tuple[str, ...] = ()  # question ids still below the confidence threshold after the last tier
 
     def __getitem__(self, question_id: str) -> Answer:
         return self.answers[question_id]

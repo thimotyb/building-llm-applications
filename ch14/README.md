@@ -9,6 +9,8 @@ Self-contained building blocks for the Workshop 2 demos. Each file works on its 
 | `demo_judge.py` | Same questions on any provider. |
 | `jev_judge.py` | Backend for the hosted TypeSafe Jev decision model (`TYPESAFE_API_KEY`, `JEV_MODEL`; closed weights, API only). Input-token billing only. |
 | `judge_factory.py` | `make_judge()` picks the backend: `JUDGE_BACKEND=llm` (default) or `jev`; `JUDGE_FALLBACK=llm` falls back to the LLM judge if no key. |
+| `router.py` | Routing: `CascadeJudge` (cheap judge first, unsure questions go to the next tier, still unsure -> `needs_human`) and `escalating_generate` (small worker model until the harness fails, then the large one). `JUDGE_BACKEND=cascade`, `--escalate`. |
+| `bench/routing_replay.py` | Replays a cascade on stored benchmark results (no model calls): accuracy, human share, cost and latency per threshold. |
 | `harness.py` | Deterministic harness for the payment-retry case: runs the read-only tests on the agent's file, plus static scope checks. It is the hard stop criterion. |
 | `agentic_loop.py` | LangGraph loop: generate → harness → judge → decide (repeat / human / stop), budgeted iterations, human-in-the-loop interrupt, live trace and cost. |
 | `case_retry/` | Spec (Spec Kit), starter, tests and reference solution of the payment-retry case (copied from the augmented-coding demo). |
@@ -59,6 +61,14 @@ LLM_PROVIDER=deepseek JUDGE_BACKEND=jev .venv/bin/python agentic_loop.py --human
 Pin `JEV_MODEL` to a version once thresholds are calibrated (`jev-latest` is an alias that can move).
 Do not send personal or private data to the hosted API without approval.
 
+## Routing
+
+```bash
+JUDGE_BACKEND=cascade CASCADE_THRESHOLD=0.7 LLM_PROVIDER=deepseek .venv/bin/python demo_judge.py   # Jev, then DeepSeek on unsure questions
+LLM_PROVIDER=ollama OLLAMA_MODEL=gemma4:e4b LARGE_PROVIDER=ollama LARGE_MODEL=<gemma 12b tag> .venv/bin/python agentic_loop.py --escalate
+.venv/bin/python bench/routing_replay.py --tiers jev-1.14.0 deepseek-v4-flash
+```
+
 ## Planned
 
-Local open decision-model backend, model routing, A2A reviewer. See `notes/TODO-seminar.md` in the course repo.
+A2A reviewer. See `notes/TODO-seminar.md` in the course repo.

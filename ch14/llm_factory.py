@@ -12,8 +12,8 @@ Environment (same names as the other chapters, read from the repo-root `.env`):
     OPENAI_MODEL      default gpt-4o-mini
     LLM_FALLBACK_OLLAMA=1  fall back to Ollama if the cloud key is missing
 
-The judge can use a different provider than the worker: pass `role="judge"`
-and set JUDGE_PROVIDER / JUDGE_MODEL (they default to the worker settings).
+Other roles use their own prefix: role="judge" -> JUDGE_PROVIDER / JUDGE_MODEL,
+role="large" (escalation model) -> LARGE_PROVIDER / LARGE_MODEL. Unset values fall back to the worker settings.
 """
 
 from __future__ import annotations
@@ -83,7 +83,7 @@ def resolve_model(
 ) -> ModelSpec:
     """Resolve provider/model from arguments, then role env vars, then defaults."""
 
-    prefix = "JUDGE_" if role == "judge" else ""
+    prefix = "" if role == "worker" else f"{role.upper()}_"  # e.g. JUDGE_PROVIDER, LARGE_MODEL
     provider = (provider or _env(f"{prefix}PROVIDER") or _env("LLM_PROVIDER", "ollama")).lower()
     if provider not in PROVIDERS:
         raise RuntimeError(f"Unsupported provider '{provider}'. Use one of: {', '.join(PROVIDERS)}.")
