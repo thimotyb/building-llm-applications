@@ -121,3 +121,12 @@ A2A reviewer. See `notes/TODO-seminar.md` in the course repo.
 
 - `traces/live-deepseek-jev.jsonl`: real run, DeepSeek as worker and Jev as judge, accepted on the first iteration.
 - `traces/replay-full.jsonl`: the scripted four-iteration story (test failure, static rule, judge revise, uncertain judge, person approves).
+
+`bench/cascade_trace.py` runs a real cascade (Jev first, an LLM judge on the unsure questions) on 12 tickets and records every call to every tier:
+
+```bash
+JUDGE_PROVIDER=deepseek JEV_MODEL=jev-1.14.0 .venv/bin/python bench/cascade_trace.py --out traces/cascade-live.jsonl [--threshold 0.7] [--tickets 12]
+```
+
+- `traces/cascade-live.jsonl`: threshold 0.7 (2 of 36 questions escalated, none to a person).
+- `traces/cascade-live-threshold-095.jsonl`: threshold 0.95 (16 escalated, 10 to a person).
