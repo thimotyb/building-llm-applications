@@ -35,6 +35,14 @@ class HarnessReport:
     output: str  # trimmed unittest output, used as feedback
 
     @property
+    def feedback(self) -> str:
+        """Text for the next attempt: static rule violations first, then the test output."""
+        if not self.static_violations:
+            return self.output
+        rules = "\n".join(f"- {v}" for v in self.static_violations)
+        return f"Static rule violations (fix these):\n{rules}\n\n{self.output}"
+
+    @property
     def summary(self) -> str:
         status = "PASS" if self.passed else "FAIL"
         extra = f", static: {'; '.join(self.static_violations)}" if self.static_violations else ""

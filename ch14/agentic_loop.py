@@ -97,7 +97,7 @@ def _extract_code(text: str) -> str:
     return (match.group(1) if match else text).strip() + "\n"
 
 
-def build_graph(generate: GenerateFn, judge: Judge, checkpointer=None):
+def build_graph(generate: GenerateFn, judge: Judge, checkpointer=None, harness=run_harness):
     def n_generate(state: LoopState) -> dict:
         start = time.perf_counter()
         code, cost = generate(state["spec"], state["code"], state.get("feedback", ""))
@@ -109,10 +109,10 @@ def build_graph(generate: GenerateFn, judge: Judge, checkpointer=None):
         }
 
     def n_harness(state: LoopState) -> dict:
-        report = run_harness(state["code"])
+        report = harness(state["code"])
         return {
             "tests_passed": report.passed,
-            "feedback": "" if report.passed else f"The harness failed:\n{report.output}",
+            "feedback": "" if report.passed else f"The harness failed:\n{report.feedback}",
             "trace": [{"iter": state["iteration"], "node": "harness", "result": report.summary}],
         }
 
@@ -193,7 +193,8 @@ def _judge_decision(p_ok: float, p_creep: float) -> str:
     return "unsure"
 
 
-def run(graph, spec: str, code: str, max_iters: int, human: str, thread: str = "run") -> LoopState:
+def run(graph, spec: str, code: str, max_iters: int, human: str, thread: str = "run",
+        on_row=None, on_interrupt=None) -> LoopState:
     """Drive the graph, printing a live trace; `human` is ask | approve | stop."""
     config = {"configurable": {"thread_id": thread}}
     payload: object = {"spec": spec, "code": code, "iteration": 0, "max_iters": max_iters,
@@ -206,11 +207,17 @@ def run(graph, spec: str, code: str, max_iters: int, human: str, thread: str = "
                     interrupted = update[0].value
                     continue
                 for row in update.get("trace", []):
-                    print("  " + json.dumps(row, ensure_ascii=False))
+                    if on_row:
+                        on_row(row)
+                    else:
+                        print("  " + json.dumps(row, ensure_ascii=False))
         if interrupted is None:
             return graph.get_state(config).values
-        print(f"\n[HUMAN] {interrupted['question']}  (iter {interrupted['iteration']}, "
-              f"tests_passed={interrupted['tests_passed']})")
+        if on_interrupt:
+            on_interrupt(interrupted)
+        else:
+            print(f"\n[HUMAN] {interrupted['question']}  (iter {interrupted['iteration']}, "
+                  f"tests_passed={interrupted['tests_passed']})")
         reply = {"approve": "approve", "stop": "stop"}.get(human) or input("> ")
         payload = Command(resume=reply)
 

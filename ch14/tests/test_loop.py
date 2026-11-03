@@ -90,3 +90,11 @@ def test_judge_revise_loops_back_with_feedback():
     final = run(graph, SPEC, STARTER, max_iters=4, human="stop", thread="t5")
     assert final["status"] == "accepted" and final["iteration"] == 2
     assert "outside the spec" in generator.calls["feedback"][1]
+
+
+def test_static_violation_reaches_the_generator_as_feedback():
+    generator = scripted_generator(CREEP, GOOD)
+    graph = build_graph(generator, ScriptedJudge((0.95, 0.05)))
+    final = run(graph, SPEC, STARTER, max_iters=4, human="stop", thread="t6")
+    assert final["status"] == "accepted" and final["iteration"] == 2
+    assert "no sleeping/backoff" in generator.calls["feedback"][1]  # the reason, not only an all-green test log
