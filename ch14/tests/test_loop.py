@@ -45,17 +45,23 @@ def scripted_generator(*codes):
     return generate
 
 
+# The harness itself is correct: it fails the buggy starter file and passes the reference solution
+# (3 tests).
 def test_harness_fails_the_starter_and_passes_the_reference():
     assert not run_harness(STARTER).passed
     report = run_harness(GOOD)
     assert report.passed and report.tests_run == 3
 
 
+# Code with a forbidden call (time.sleep) fails the harness through the static rules even though
+# the unit tests are green.
 def test_harness_rejects_out_of_scope_code_even_if_tests_pass():
     report = run_harness(CREEP)
     assert not report.passed and any("sleep" in v for v in report.static_violations)
 
 
+# Full loop: the first attempt fails the tests, the failure is sent back as feedback, the second
+# passes, the judge accepts, and no person is involved.
 def test_loop_repairs_then_accepts_without_human():
     generator = scripted_generator(STARTER, GOOD)
     graph = build_graph(generator, ScriptedJudge((0.95, 0.05)))
@@ -65,6 +71,8 @@ def test_loop_repairs_then_accepts_without_human():
     assert [r["node"] for r in final["trace"]] == ["generate", "harness", "generate", "harness", "judge"]
 
 
+# A judge answer in the uncertain band interrupts the loop; the person approves and the run ends
+# as accepted.
 def test_uncertain_judge_goes_to_human_who_can_approve():
     graph = build_graph(scripted_generator(GOOD), ScriptedJudge((0.55, 0.5)))
     final = run(graph, SPEC, STARTER, max_iters=4, human="approve", thread="t2")
@@ -72,11 +80,14 @@ def test_uncertain_judge_goes_to_human_who_can_approve():
     assert final["trace"][-1] == {"iter": 1, "node": "human", "decision": "approve"}
 
 
+# The same interrupt, but the person replies 'stop': the run ends as stopped.
 def test_human_can_stop_the_loop():
     graph = build_graph(scripted_generator(GOOD), ScriptedJudge((0.55, 0.5)))
     assert run(graph, SPEC, STARTER, 4, "stop", thread="t3")["status"] == "stopped"
 
 
+# When max_iters is reached with tests still failing, the loop stops asking the generator and
+# escalates to a person.
 def test_budget_exhaustion_escalates_to_human():
     graph = build_graph(scripted_generator(STARTER), ScriptedJudge((0.9, 0.1)))
     final = run(graph, SPEC, STARTER, max_iters=2, human="stop", thread="t4")
@@ -84,6 +95,8 @@ def test_budget_exhaustion_escalates_to_human():
     assert final["trace"][-1]["node"] == "human"
 
 
+# A confident 'scope creep' verdict returns to the generator with the judge's findings, and the
+# next attempt is accepted.
 def test_judge_revise_loops_back_with_feedback():
     generator = scripted_generator(GOOD, GOOD)
     graph = build_graph(generator, ScriptedJudge((0.1, 0.9), (0.95, 0.05)))
@@ -92,6 +105,8 @@ def test_judge_revise_loops_back_with_feedback():
     assert "outside the spec" in generator.calls["feedback"][1]
 
 
+# The static-rule violation text is passed to the generator, so it learns why it failed and not
+# only that the tests were green.
 def test_static_violation_reaches_the_generator_as_feedback():
     generator = scripted_generator(CREEP, GOOD)
     graph = build_graph(generator, ScriptedJudge((0.95, 0.05)))

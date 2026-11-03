@@ -35,6 +35,8 @@ def judge_with(handler):
     return JevJudge(model="jev-1.14.0", api_key="secret", base_url="https://x.test", client=client, max_retries=1)
 
 
+# Checks the Jev request (auth header, question types, criteria, 5 score levels) and that the
+# response maps to typed answers, cost, and backend name.
 def test_request_shape_and_typed_answers():
     seen = {}
 
@@ -54,6 +56,8 @@ def test_request_shape_and_typed_answers():
     assert verdict.cost_usd == pytest.approx(0.042) and verdict.backend == "jev-1.14.0"
 
 
+# A 429 is retried with backoff and then succeeds; any other API error (401) is raised and never
+# turned into a 'no' answer.
 def test_rate_limit_is_retried_then_errors_are_not_swallowed(monkeypatch):
     monkeypatch.setattr("jev_judge.time.sleep", lambda s: None)
     calls = {"n": 0}
@@ -69,6 +73,8 @@ def test_rate_limit_is_retried_then_errors_are_not_swallowed(monkeypatch):
         judge_with(lambda r: httpx.Response(401, text="bad key")).judge("s", QUESTIONS)
 
 
+# make_judge() picks the backend from JUDGE_BACKEND, fails without TYPESAFE_API_KEY, and falls
+# back to the LLM judge when JUDGE_FALLBACK=llm.
 def test_factory_selects_backend_and_falls_back(monkeypatch):
     monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
     monkeypatch.setenv("JUDGE_BACKEND", "jev")
@@ -80,6 +86,8 @@ def test_factory_selects_backend_and_falls_back(monkeypatch):
     assert type(make_judge()).__name__ == "LLMJudge"
 
 
+# The OpenDecider backend sends the same question schema as Jev and maps its answers back, with
+# zero cost (tested with a fake model, not the real package).
 def test_opendecider_backend_reuses_the_shared_schema():
     from opendecider_judge import OpenDeciderJudge
 

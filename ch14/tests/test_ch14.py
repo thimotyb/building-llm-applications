@@ -20,6 +20,8 @@ def clean_env(monkeypatch):
         monkeypatch.delenv(name, raising=False)
 
 
+# With no environment variables set, the factory resolves to the local Ollama model (gemma4:e4b)
+# and needs no API key.
 def test_default_is_local_ollama():
     spec = llm_factory.resolve_model()
     assert spec.provider == "ollama"
@@ -27,6 +29,8 @@ def test_default_is_local_ollama():
     assert spec.api_key is None
 
 
+# Changing LLM_PROVIDER only changes the LiteLLM model string and key; no other code path differs
+# between providers.
 def test_provider_switch_only_changes_model_string(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "deepseek")
     monkeypatch.setenv("DEEPSEEK_API_KEY", "k")
@@ -35,6 +39,8 @@ def test_provider_switch_only_changes_model_string(monkeypatch):
     assert spec.api_key == "k"
 
 
+# A hosted provider without its API key fails loudly, unless LLM_FALLBACK_OLLAMA=1 asks for a
+# silent fallback to local Ollama.
 def test_missing_key_raises_or_falls_back(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "deepseek")
     with pytest.raises(RuntimeError, match="DEEPSEEK_API_KEY"):
@@ -43,6 +49,8 @@ def test_missing_key_raises_or_falls_back(monkeypatch):
     assert llm_factory.resolve_model().provider == "ollama"
 
 
+# The judge role (JUDGE_*) can use a different provider than the worker, so the judge is not the
+# model that wrote the answer.
 def test_judge_role_is_independent_from_worker(monkeypatch):
     monkeypatch.setenv("LLM_PROVIDER", "ollama")
     monkeypatch.setenv("JUDGE_PROVIDER", "gemini")
@@ -67,6 +75,8 @@ PAYLOAD = (
 )
 
 
+# LLMJudge turns the model's JSON into typed answers (choice, yes/no, score) and clamps a score to
+# its declared range.
 def test_llm_judge_parses_typed_answers(monkeypatch):
     monkeypatch.setattr(judge_mod, "complete", lambda *a, **k: _fake_completion(PAYLOAD))
     verdict = LLMJudge(llm_factory.resolve_model()).judge("state", QUESTIONS)
@@ -75,6 +85,7 @@ def test_llm_judge_parses_typed_answers(monkeypatch):
     assert verdict["quality"].value == 10  # clamped to the declared range
 
 
+# An option outside the declared choices is an error, not silently accepted.
 def test_llm_judge_rejects_invalid_option(monkeypatch):
     bad = '{"answers": {"route": {"option": "sales"}, "urgent": {"p_true": 0.5}, "quality": 1}}'
     monkeypatch.setattr(judge_mod, "complete", lambda *a, **k: _fake_completion(bad))
@@ -82,6 +93,8 @@ def test_llm_judge_rejects_invalid_option(monkeypatch):
         LLMJudge(llm_factory.resolve_model()).judge("s", QUESTIONS)
 
 
+# With samples>1 the judge asks several times and uses the vote shares (3 of 4 = 0.75) as
+# probabilities.
 def test_sampling_produces_empirical_probabilities(monkeypatch):
     replies = iter(
         ['{"answers": {"route": "tech"}}'] * 3 + ['{"answers": {"route": "billing"}}']
@@ -93,6 +106,7 @@ def test_sampling_produces_empirical_probabilities(monkeypatch):
     assert verdict["route"].probabilities["tech"] == pytest.approx(0.75)
 
 
+# decide() maps a probability to yes / no / unsure; the middle band is what gets sent to a person.
 def test_decide_has_an_uncertain_band_for_human_review():
     def noul(p):
         return Answer("x", p >= 0.5, {"true": p, "false": 1 - p})
@@ -102,12 +116,15 @@ def test_decide_has_an_uncertain_band_for_human_review():
     assert decide(noul(0.5)) == "unsure"
 
 
+# FakeJudge returns exactly the answers it was given, so tests and the replay demo need no model.
 def test_fake_judge_is_deterministic():
     answers = {"urgent": Answer("urgent", True, {"true": 0.95, "false": 0.05})}
     verdict = FakeJudge(answers).judge("s", [QUESTIONS[1]])
     assert verdict["urgent"].confidence == 0.95
 
 
+# If the model skips some questions, only those are asked again (a smaller prompt) and the answers
+# are merged.
 def test_missing_question_is_asked_again_alone(monkeypatch):
     calls = []
 
@@ -123,6 +140,8 @@ def test_missing_question_is_asked_again_alone(monkeypatch):
     assert verdict["urgent"].value is False and verdict["quality"].value == 3
 
 
+# If a question is still unanswered after the retries, the judge raises an error instead of
+# inventing an answer.
 def test_still_missing_after_retries_raises(monkeypatch):
     monkeypatch.setattr(judge_mod, "complete", lambda *a, **k: _fake_completion('{"answers": {}}'))
     with pytest.raises(ValueError, match="no answer"):
