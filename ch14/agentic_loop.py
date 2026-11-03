@@ -37,8 +37,22 @@ from judge_factory import make_judge
 from llm_factory import ModelSpec, complete, resolve_model
 from router import escalating_generate
 
-# A generator is any function (spec, current_code, feedback) -> (new_code, cost_usd).
-# The loop does not care whether it wraps an LLM, a stub, or an escalating pair of models.
+# WHAT THE "GENERATOR" IS
+# It is the worker of the loop: the only component that WRITES code. Everything else in the graph
+# (harness, judge, decide) only CHECKS what the generator wrote. Think of it as the author, with the
+# harness and the judge acting as reviewers.
+#
+# Contract: a plain function (spec, current_code, feedback) -> (new_code, cost_usd)
+#   spec          the requirements to satisfy (never changes during the run)
+#   current_code  the latest attempt (the starter file on iteration 1)
+#   feedback      why the previous attempt was rejected ("" on the first attempt). This is the ONLY
+#                 channel through which the checks influence the next attempt: without feedback the
+#                 generator would just repeat itself and the loop would be pointless.
+#   returns       the complete new content of the file, plus what the call cost
+#
+# Because it is just a function, the loop does not care what is behind it: a real LLM (llm_generate
+# below), a scripted stub in the tests, or two models chained by escalating_generate (router.py):
+# a small cheap model first, a larger one once an attempt has failed.
 GenerateFn = Callable[[str, str, str], tuple[str, float]]  # (spec, current_code, feedback) -> (code, cost)
 
 # Decision thresholds live in code, not in the model. A probability >= ACCEPT counts as "yes",
@@ -83,17 +97,25 @@ _GEN_SYSTEM = (
 
 
 def llm_generate(spec_model: ModelSpec) -> GenerateFn:
-    """Build a generator on top of any provider selected by the LLM factory (Ollama, DeepSeek, Gemini...)."""
+    """Build the real generator: one LLM call per attempt, on any provider the LLM factory supports.
+
+    Each call is stateless. Nothing is remembered between attempts except what we put in the prompt:
+    the spec, the current code and, on a retry, the feedback. That is why the typed loop state, and
+    not the model, is what carries the history.
+    """
 
     def generate(spec: str, code: str, feedback: str) -> tuple[str, float]:
+        # 1. Build the prompt: requirements + the code as it stands now
         user = f"SPEC:\n{spec}\n\nCURRENT payment_retry.py:\n```python\n{code}\n```\n"
         # On a retry the previous failure is appended to the prompt: this is the loop's feedback channel
         if feedback:
             user += f"\nFEEDBACK ON THE PREVIOUS ATTEMPT (fix this):\n{feedback}\n"
+        # 2. Call the model: the system prompt fixes the role and the output format
         response = complete(
             [{"role": "system", "content": _GEN_SYSTEM}, {"role": "user", "content": user}], spec_model
         )
         text = response.choices[0].message.content or ""
+        # 3. Account for the call: the loop sums these costs, so the iteration budget is also a cost cap
         # Cost is best effort: unknown models (e.g. local ones) simply count as zero
         try:
             import litellm
@@ -101,6 +123,8 @@ def llm_generate(spec_model: ModelSpec) -> GenerateFn:
             cost = float(litellm.completion_cost(completion_response=response) or 0.0)
         except Exception:
             cost = 0.0
+        # 4. Extract the new file from the reply and hand it back to the graph (node n_generate),
+        #    which stores it in the state and passes it to the harness
         return _extract_code(text), cost
 
     return generate
