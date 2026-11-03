@@ -1,0 +1,4 @@
+{"node": "run", "worker": "deepseek/deepseek-v4-flash", "judge": "JevJudge", "max_iters": 4, "status": "accepted", "cost_usd": 0.000813}
+{"iter": 1, "node": "generate", "chars": 1628, "cost": 0.000744006, "seconds": 10.44}
+{"iter": 1, "node": "harness", "result": "PASS (3 tests, 0 failing)"}
+{"iter": 1, "node": "judge", "backend": "jev-1.14.0", "p_spec_ok": 0.81, "p_scope_creep": 0.21, "decision": "accept", "cost": 6.921600000000001e-05}

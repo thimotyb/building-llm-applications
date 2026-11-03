@@ -332,6 +332,10 @@ def main() -> None:
     # Where to save the final accepted code. Without it the code is only held in memory and printed
     # as a trace; the original starter file is never overwritten.
     parser.add_argument("--out", type=Path, help="write the final payment_retry.py here")
+
+    # Save the run's trace as JSON Lines: one record per node execution (generate, harness, judge,
+    # human), in order. It is the same list that run() prints while the loop is running.
+    parser.add_argument("--trace", type=Path, help="write the trace of the run as JSON Lines to this file")
     args = parser.parse_args()
 
     # STEP 1 - choose the WORKER model (the one that writes the code).
@@ -382,6 +386,17 @@ def main() -> None:
     # STEP 8 (optional) - save the accepted code; the starter file in case_retry/ is left untouched.
     if args.out:
         args.out.write_text(final["code"], encoding="utf-8")
+
+    # STEP 9 (optional) - save the trace. Each node returned a "trace" field (see n_generate, n_harness,
+    # n_judge, n_human); the reducer on LoopState.trace appended them in order, so final["trace"] is the
+    # complete history of the run. One JSON object per line makes it easy to grep, diff, or load later.
+    if args.trace:
+        header = {"node": "run", "worker": worker.label, "judge": type(judge).__name__,
+                  "max_iters": args.max_iters, "status": final["status"], "cost_usd": round(final["cost_usd"], 6)}
+        lines = [header, *final["trace"]]
+        args.trace.parent.mkdir(parents=True, exist_ok=True)
+        args.trace.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in lines) + "\n", encoding="utf-8")
+        print(f"trace written to {args.trace}")
 
 
 if __name__ == "__main__":

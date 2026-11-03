@@ -112,3 +112,12 @@ LLM_PROVIDER=ollama OLLAMA_MODEL=gemma4:e4b LARGE_PROVIDER=ollama LARGE_MODEL=<g
 ## Planned
 
 A2A reviewer. See `notes/TODO-seminar.md` in the course repo.
+
+## Traces
+
+`agentic_loop.py --trace FILE` and `demo_live.py --trace FILE` write the trace of a run as JSON Lines: a header record
+(`"node": "run"`, with worker, judge, status and total cost) followed by one record per node execution
+(`generate`, `harness`, `judge`, `human`), in order. Saved examples are in `traces/`:
+
+- `traces/live-deepseek-jev.jsonl`: real run, DeepSeek as worker and Jev as judge, accepted on the first iteration.
+- `traces/replay-full.jsonl`: the scripted four-iteration story (test failure, static rule, judge revise, uncertain judge, person approves).

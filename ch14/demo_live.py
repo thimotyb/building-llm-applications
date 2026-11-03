@@ -14,6 +14,7 @@ Options: --human ask|approve|stop  --max-iters N  --delay SECONDS  --log FILE  -
 
 from __future__ import annotations
 
+import json
 import argparse
 import difflib
 import os
@@ -266,6 +267,10 @@ def main() -> None:
     # Disable ANSI colours (for terminals or projectors where they are unreadable). Colours are also
     # off automatically when the output is piped to a file.
     parser.add_argument("--no-color", action="store_true")
+
+    # Save the trace of the run as JSON Lines (one record per node execution), the same rows the
+    # narrated log is built from.
+    parser.add_argument("--trace", type=Path, help="write the trace as JSON Lines to this file")
     args = parser.parse_args()
 
     log = Log(color=sys.stdout.isatty() and not args.no_color, logfile=args.log, delay=args.delay)
@@ -314,11 +319,13 @@ def main() -> None:
     log.step("🎚️ ", f"Thresholds in code: accept spec_ok ≥ {ACCEPT}, scope_creep ≤ {REJECT}; between = ask a person", indent=1)
     log.step("🔢", f"Budget : {args.max_iters} iterations; person: --human {args.human}", indent=1)
 
+    trace_rows: list[dict] = []
     judge = LoggedJudge(judge_inner, log, story, counter)
     harness = LoggedHarness(log, story, counter)
     gen = LoggedGenerate(generator, log, story, label, args.max_iters, plant)
 
     def on_row(row: dict) -> None:
+        trace_rows.append(row)
         node, i = row["node"], row["iter"]
         if node == "judge":
             decision = row["decision"]
@@ -386,6 +393,13 @@ def main() -> None:
         show_harness(log, run_harness(final["code"]), time.perf_counter() - start)
         log.step("🧬", "Change from the starter to the accepted code:", indent=1)
         log.diff(STARTER, final["code"], limit=24)
+    if args.trace:
+        args.trace.parent.mkdir(parents=True, exist_ok=True)
+        header = {"node": "run", "mode": args.mode, "worker": label, "judge": type(judge_inner).__name__,
+                  "max_iters": args.max_iters, "status": status, "cost_usd": round(final["cost_usd"], 6)}
+        args.trace.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in [header, *trace_rows]) + "\n",
+                              encoding="utf-8")
+        log.step("🧾", f"Trace saved to {args.trace}", indent=1)
     if args.out and status == "accepted":
         args.out.write_text(final["code"], encoding="utf-8")
         log.step("💾", f"Saved to {args.out}", indent=1)

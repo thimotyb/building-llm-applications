@@ -1,0 +1,12 @@
+{"node": "run", "mode": "replay", "worker": "replay (scripted, no network)", "judge": "ReplayJudge", "max_iters": 5, "status": "accepted", "cost_usd": 0.0}
+{"iter": 1, "node": "generate", "chars": 1632, "cost": 0.0, "seconds": 0.0}
+{"iter": 1, "node": "harness", "result": "FAIL (3 tests, 1 failing)"}
+{"iter": 2, "node": "generate", "chars": 1676, "cost": 0.0, "seconds": 0.0}
+{"iter": 2, "node": "harness", "result": "FAIL (3 tests, 0 failing, static: no sleeping/backoff: it is outside the spec)"}
+{"iter": 3, "node": "generate", "chars": 1743, "cost": 0.0, "seconds": 0.0}
+{"iter": 3, "node": "harness", "result": "PASS (3 tests, 0 failing)"}
+{"iter": 3, "node": "judge", "backend": "replay", "p_spec_ok": 0.92, "p_scope_creep": 0.84, "decision": "revise", "cost": 0.0}
+{"iter": 4, "node": "generate", "chars": 1632, "cost": 0.0, "seconds": 0.0}
+{"iter": 4, "node": "harness", "result": "PASS (3 tests, 0 failing)"}
+{"iter": 4, "node": "judge", "backend": "replay", "p_spec_ok": 0.74, "p_scope_creep": 0.45, "decision": "unsure", "cost": 0.0}
+{"iter": 4, "node": "human", "decision": "approve"}
