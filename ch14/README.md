@@ -12,6 +12,7 @@ Self-contained building blocks for the Workshop 2 demos. Each file works on its 
 | `router.py` | Routing: `CascadeJudge` (cheap judge first, unsure questions go to the next tier, still unsure -> `needs_human`) and `escalating_generate` (small worker model until the harness fails, then the large one). `JUDGE_BACKEND=cascade`, `--escalate`. |
 | `bench/routing_replay.py` | Replays a cascade on stored benchmark results (no model calls): accuracy, human share, cost and latency per threshold. |
 | `harness.py` | Deterministic harness for the payment-retry case: runs the read-only tests on the agent's file, plus static scope checks. It is the hard stop criterion. |
+| `demo_live.py` | **Narrated demo of the whole loop** (icons in the log, probability bars, diff of the code, closing table). Offline `replay` mode or `live` mode with real models. |
 | `agentic_loop.py` | LangGraph loop: generate → harness → judge → decide (repeat / human / stop), budgeted iterations, human-in-the-loop interrupt, live trace and cost. |
 | `case_retry/` | Spec (Spec Kit), starter, tests and reference solution of the payment-retry case (copied from the augmented-coding demo). |
 | `tests/` | Offline tests (no network, no API key). |
@@ -41,7 +42,46 @@ With `samples=1` the probabilities are self-reported by the model and are often 
 (small models answer `1.0` too easily). `--samples N` derives them from vote shares. Always
 calibrate the thresholds used by `decide()` on labelled examples before relying on them.
 
-## Agentic loop
+## Narrated demo (`demo_live.py`)
+
+Starting situation: a payment-retry function that makes a single attempt (2 of 3 tests fail). The loop
+generates candidates, the harness runs read-only tests and static rules, the judge answers typed questions with
+probabilities, and code decides: repeat, ask a person, or accept. Every step is printed with an icon.
+
+```bash
+# Offline, scripted, no network and no API key (the safe option in a classroom)
+.venv/bin/python demo_live.py --mode replay                  # full story: 4 iterations, every branch
+.venv/bin/python demo_live.py --mode replay --story short    # shortest path: 2 iterations
+.venv/bin/python demo_live.py --mode replay --delay 0.6      # slower pacing for a projector
+
+# Live with real models (keys in the repo-root .env); the first attempt is a PLANTED flaw, labelled in the log
+LLM_PROVIDER=deepseek JUDGE_BACKEND=jev JEV_MODEL=jev-1.14.0 .venv/bin/python demo_live.py --mode live --inject off-by-one,backoff
+JUDGE_BACKEND=cascade CASCADE_THRESHOLD=0.7 LLM_PROVIDER=deepseek .venv/bin/python demo_live.py --mode live --human ask
+LLM_PROVIDER=ollama OLLAMA_MODEL=gemma4:e4b .venv/bin/python demo_live.py --mode live --inject none   # fully local
+```
+
+| Option | Meaning |
+| --- | --- |
+| `--mode replay\|live` | Scripted offline run, or real models (default: replay) |
+| `--story full\|short` | Replay storyline |
+| `--inject LIST` | Live: planted first attempts: `off-by-one` (test fails), `backoff` (static rule), `scope-creep` (judge flags), or `none` |
+| `--human ask\|approve\|stop` | How the person step is answered (default: approve) |
+| `--max-iters N` | Iteration budget (default 5) |
+| `--escalate` | Live: switch to `LARGE_PROVIDER`/`LARGE_MODEL` after a failed attempt |
+| `--delay S` | Pause between sections, for pacing |
+| `--log FILE` | Also write a plain-text log (no colours) |
+| `--out FILE` | Save the accepted `payment_retry.py` |
+| `--no-color` | Disable ANSI colours (also automatic when output is not a terminal) |
+
+What the log shows, in order: goal and exclusions, the starter against the tests, configuration (worker, judge,
+thresholds, budget), then per iteration: feedback received, the candidate with its diff, the harness result per
+acceptance scenario, the judge probabilities against the thresholds, the decision, and finally a table of
+iterations, cost and time plus the diff from the starter to the accepted code.
+
+Notes: the replay is scripted (costs are zero by construction); in live mode a strong model rarely fails alone,
+which is why a flawed first attempt is planted and labelled. A backup log can be saved with `--log`.
+
+## Agentic loop (without the narration)
 
 ```bash
 LLM_PROVIDER=deepseek .venv/bin/python agentic_loop.py --human ask
