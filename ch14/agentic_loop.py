@@ -334,18 +334,52 @@ def main() -> None:
     parser.add_argument("--out", type=Path, help="write the final payment_retry.py here")
     args = parser.parse_args()
 
+    # STEP 1 - choose the WORKER model (the one that writes the code).
+    # resolve_model() (llm_factory.py) reads LLM_PROVIDER (ollama | deepseek | gemini) and the matching
+    # model variable (OLLAMA_MODEL, DEEPSEEK_MODEL, ...) and returns a ModelSpec: provider, LiteLLM model
+    # string and API key. With nothing set it picks local Ollama gemma4:e4b.
     worker = resolve_model()
+
+    # STEP 2 - choose the JUDGE (the one that checks the code), independently from the worker.
+    # make_judge() (judge_factory.py) reads JUDGE_BACKEND and returns ONE object with a .judge() method:
+    #   JUDGE_BACKEND unset / llm  -> LLMJudge   (judge.py)          any LiteLLM model, JUDGE_PROVIDER/JUDGE_MODEL
+    #   JUDGE_BACKEND=jev          -> JevJudge   (jev_judge.py)      hosted Jev API, needs TYPESAFE_API_KEY
+    #   JUDGE_BACKEND=cascade      -> CascadeJudge (router.py)       Jev first, the LLM judge only if unsure
+    #   JUDGE_BACKEND=opendecider  -> OpenDeciderJudge               local open decision model
+    # The loop below never learns which one it got: all of them answer the same typed questions with
+    # probabilities, so switching backend is an environment change, not a code change.
     judge = make_judge(samples=args.judge_samples)
+
+    # Print the resolved configuration first, so a run is never ambiguous about which models it used.
     print(f"worker={worker.label}  judge_backend={type(judge).__name__}  max_iters={args.max_iters}")
+
+    # STEP 3 - build the generator: a function that, given spec + current code + feedback, asks the
+    # worker model for a new version of the file (see "WHAT THE GENERATOR IS" above).
     generate = llm_generate(worker)
+
+    # STEP 4 (optional) - model escalation. escalating_generate() (router.py) wraps two generators:
+    # the small worker answers the first attempt, the large one answers any retry after a failure.
+    # The large model comes from LARGE_PROVIDER / LARGE_MODEL (role="large" in resolve_model).
     if args.escalate:
         large = resolve_model(role="large")
         print(f"escalation model={large.label}")
         generate = escalating_generate(generate, llm_generate(large))
+
+    # STEP 5 - assemble the loop: the LangGraph graph generate -> harness -> judge -> decide, with
+    # the generator and the judge plugged in. The harness is the default run_harness.
     graph = build_graph(generate, judge)
+
+    # STEP 6 - run it. The inputs are the case study files: spec.md (what to build) and the buggy
+    # starter payment_retry.py (where to start). run() streams the trace, handles the pauses for a
+    # person according to --human, and returns the final typed state.
     final = run(graph, (CASE_DIR / "spec.md").read_text(), (CASE_DIR / "payment_retry.py").read_text(),
                 args.max_iters, args.human)
+
+    # STEP 7 - summarize the outcome: accepted or stopped, attempts used, and total cost of the
+    # generator and judge calls (the budget in money, next to the budget in iterations).
     print(f"\nstatus={final['status']}  iterations={final['iteration']}  cost=${final['cost_usd']:.4f}")
+
+    # STEP 8 (optional) - save the accepted code; the starter file in case_retry/ is left untouched.
     if args.out:
         args.out.write_text(final["code"], encoding="utf-8")
 
