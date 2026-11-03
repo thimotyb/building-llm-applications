@@ -301,12 +301,36 @@ def run(graph, spec: str, code: str, max_iters: int, human: str, thread: str = "
 
 def main() -> None:
     """CLI entry point: pick worker, judge and options from the environment and flags, then run the loop."""
+    # Command-line flags. Which MODELS are used is NOT decided here but by environment variables
+    # (LLM_PROVIDER / OLLAMA_MODEL for the worker, JUDGE_BACKEND / JUDGE_PROVIDER for the judge,
+    # LARGE_PROVIDER / LARGE_MODEL for the escalation model); the flags below only tune the loop.
     parser = argparse.ArgumentParser()
-    parser.add_argument("--human", choices=["ask", "approve", "stop"], default="ask")
-    parser.add_argument("--max-iters", type=int, default=4)
-    parser.add_argument("--judge-samples", type=int, default=1)
+
+    # What to do when the loop pauses for a person (judge unsure, or budget exhausted):
+    #   ask      stop and read the answer from the keyboard (interactive demo)
+    #   approve  answer "approve" automatically (unattended runs, scripts)
+    #   stop     answer "stop" automatically (shows the loop giving up instead of guessing)
+    parser.add_argument("--human", choices=["ask", "approve", "stop"], default="ask",
+                        help="how to answer when the loop asks a person (default: ask on the keyboard)")
+
+    # The iteration budget: the maximum number of generate attempts before the loop must escalate
+    # to a person. It guarantees the loop ends and caps the cost of a run.
+    parser.add_argument("--max-iters", type=int, default=4,
+                        help="maximum number of attempts before escalating to a person (default: 4)")
+
+    # How many times the judge is asked the same questions. With 1 the confidence comes from the
+    # backend itself; with N>1 an LLM judge is sampled N times and the vote shares become the
+    # probabilities (slower and N times the cost). Jev ignores it: it already returns probabilities.
+    parser.add_argument("--judge-samples", type=int, default=1,
+                        help="ask an LLM judge N times and use the vote shares as probabilities (default: 1)")
+
+    # Model escalation: attempt 1 uses the small worker; after a failed attempt the retry uses the
+    # larger model configured in LARGE_PROVIDER / LARGE_MODEL. Cheap first, expensive only when needed.
     parser.add_argument("--escalate", action="store_true",
                         help="after a failed attempt, regenerate with the LARGE_PROVIDER/LARGE_MODEL model")
+
+    # Where to save the final accepted code. Without it the code is only held in memory and printed
+    # as a trace; the original starter file is never overwritten.
     parser.add_argument("--out", type=Path, help="write the final payment_retry.py here")
     args = parser.parse_args()
 

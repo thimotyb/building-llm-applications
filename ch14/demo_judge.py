@@ -26,7 +26,10 @@ QUESTIONS = [
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--samples", type=int, default=1)
+    # How many times the LLM judge is asked the same questions; with N>1 the vote shares become the
+    # probabilities. Ignored by Jev, which already returns probabilities.
+    parser.add_argument("--samples", type=int, default=1,
+                        help="ask an LLM judge N times and use the vote shares as probabilities")
     args = parser.parse_args()
 
     verdict = make_judge(samples=args.samples).judge(TICKET, QUESTIONS)

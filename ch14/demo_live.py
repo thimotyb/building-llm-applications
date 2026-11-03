@@ -228,16 +228,43 @@ def build_story(kind: str):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--mode", choices=["replay", "live"], default="replay")
+    # replay: scripted attempts and judge scores, no network, same output every time (safe on stage).
+    # live:   real models, real calls; the result can vary and costs a few cents at most.
+    parser.add_argument("--mode", choices=["replay", "live"], default="replay",
+                        help="replay = scripted and offline; live = real models (default: replay)")
+
+    # Replay only. full = 4 iterations that show every branch (test failure, static rule, judge revise,
+    # uncertain judge -> person); short = 2 iterations, about two minutes.
     parser.add_argument("--story", choices=["full", "short"], default="full", help="replay storyline")
+
+    # Live only. A strong model rarely gets the first attempt wrong, so we PLANT a known flaw as the
+    # first attempt (marked with a masks icon in the log) to give the harness and the judge something to catch.
+    # Pass one or more names separated by commas to chain several flaws, or 'none' for an honest run.
     parser.add_argument("--inject", default="off-by-one", help="live: comma list of planted first attempts "
                         f"({', '.join(FLAWS)}) or 'none'")
-    parser.add_argument("--human", choices=["ask", "approve", "stop"], default="approve")
+
+    # Same meaning as in agentic_loop.py, but the default is approve so the demo never blocks on the keyboard.
+    # Use "ask" to let the speaker type the decision live.
+    parser.add_argument("--human", choices=["ask", "approve", "stop"], default="approve",
+                        help="how to answer when a person is needed (default: approve automatically)")
+
+    # Iteration budget (maximum attempts before escalating to a person).
     parser.add_argument("--max-iters", type=int, default=5)
+
+    # Live only: after a failed attempt retry with the large model (LARGE_PROVIDER / LARGE_MODEL).
     parser.add_argument("--escalate", action="store_true", help="live: large model after a failed attempt")
+
+    # Presentation: pause (seconds) between sections so the audience can read the log on the projector.
     parser.add_argument("--delay", type=float, default=0.0, help="seconds of pause between sections (projector pacing)")
+
+    # Also write the log, without colours, to a file: record a backup run before the talk (plan B).
     parser.add_argument("--log", type=Path, help="also write a plain-text log file")
+
+    # Save the accepted code to a file.
     parser.add_argument("--out", type=Path, help="write the accepted payment_retry.py here")
+
+    # Disable ANSI colours (for terminals or projectors where they are unreadable). Colours are also
+    # off automatically when the output is piped to a file.
     parser.add_argument("--no-color", action="store_true")
     args = parser.parse_args()
 
