@@ -82,18 +82,32 @@ def run_xgboost(items: list[dict]) -> tuple[list[dict], float, float]:
     n = len(items)
     rows = [{"id": i["id"], "latency": 0.0, "cost": 0.0, "error": None} for i in items]
     start = time.perf_counter()
+    # One independent model per question: the loop below trains a separate
+    # vectorizer + classifier for "team" (3 classes), "urgent" and "refund" (2 classes each).
     for task in ("team", "urgent", "refund"):
         classes = dataset.TEAMS if task == "team" else [False, True]
+        # Target variable: the label stored with each ticket for this question, as a class index.
         y = np.array([classes.index(i[task]) for i in items])
+        # Out-of-fold probabilities: row = ticket, column = class. Each ticket is filled exactly once,
+        # by the model that did not see it during training.
         oof = np.zeros((n, len(classes)))
+        # 5 folds, stratified so every fold keeps the class proportions; fixed seed for reproducibility.
         for train, test in StratifiedKFold(5, shuffle=True, random_state=14).split(texts, y):
+            # Features: TF-IDF over words and word pairs. Fitted on the training fold only,
+            # so the vocabulary and word weights never leak information from the held-out tickets.
             vec = TfidfVectorizer(ngram_range=(1, 2), sublinear_tf=True)
             x_train = vec.fit_transform([texts[i] for i in train])
+            # Gradient-boosted trees: 120 shallow trees (depth 3) added one after another,
+            # each correcting the errors of the previous ones, shrunk by the learning rate. No tuning.
             model = XGBClassifier(n_estimators=120, max_depth=3, learning_rate=0.1, verbosity=0)
             model.fit(x_train, y[train])
+            # Predict the held-out tickets with the vocabulary learned on the training fold.
             proba = model.predict_proba(vec.transform([texts[i] for i in test]))
+            # model.classes_ lists only the classes seen in training: map columns back to class indices.
             for col, cls in enumerate(model.classes_):
                 oof[test, cls] = proba[:, col]
+        # Store the result in the shape the judges produce: a dict of team probabilities,
+        # or the probability of the positive class for the yes/no questions.
         for row, p in zip(rows, oof):
             row[task] = dict(zip(dataset.TEAMS, map(float, p))) if task == "team" else float(p[1])
     return rows, time.perf_counter() - start, 0.0
