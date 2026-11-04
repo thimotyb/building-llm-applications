@@ -15,6 +15,7 @@ Self-contained building blocks for the Workshop 2 demos. Each file works on its 
 | `demo_live.py` | **Narrated demo of the whole loop** (icons in the log, probability bars, diff of the code, closing table). Offline `replay` mode or `live` mode with real models. |
 | `agentic_loop.py` | LangGraph loop: generate → harness → judge → decide (repeat / human / stop), budgeted iterations, human-in-the-loop interrupt, live trace and cost. |
 | `case_retry/` | Spec (Spec Kit), starter, tests and reference solution of the payment-retry case (copied from the augmented-coding demo). |
+| `case_retry/speckit/` | The full Spec Kit artifact set of the same case: constitution, spec, decisions, plan, checklist, tasks and the prompts that produced them. |
 | `tests/` | Offline tests (no network, no API key). |
 
 ## Setup
