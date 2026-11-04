@@ -23,7 +23,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import dataset  # noqa: E402
 from judge import Choice, Noul  # noqa: E402
 
+# Where per-backend result files (<label>.json, <label>.partial.json) are written.
 RESULTS = Path(__file__).resolve().parent / "results"
+# The three questions asked of every ticket. The judges answer all of them in a single call;
+# Choice = one option among several (team), Noul = yes/no (urgent, refund).
 QUESTIONS = [
     Choice(id="team", prompt=dataset.QUESTION_TEAM, options=dataset.TEAMS, descriptions=dataset.TEAM_DESCRIPTIONS),
     Noul(id="urgent", prompt=dataset.QUESTION_URGENT),
@@ -33,18 +36,24 @@ QUESTIONS = [
 
 def run_judge(judge, items: list[dict], workers: int, label: str = "run", resume: bool = False) -> tuple[list[dict], float, float]:
     """Judge every ticket with live progress; partial results are saved so a long run can be resumed."""
+    # The partial file is rewritten after every ticket, so an interrupted run loses nothing.
     partial = RESULTS / f"{label}.partial.json"
+    # Finished rows by ticket id; with --resume, start from the successful ones already stored.
     done: dict[int, dict] = {}
     if resume and partial.exists():
         done = {r["id"]: r for r in json.loads(partial.read_text()) if not r.get("error")}
         print(f"[{label}] resuming: {len(done)} tickets already done", flush=True)
+    # Only tickets without a successful answer are sent to the judge (failed ones are retried on resume).
     todo = [i for i in items if i["id"] not in done]
 
     def one(item):
+        """Ask the three questions for one ticket; one retry on failure, then record the error."""
         err = ""
         for attempt in range(2):
             try:
                 v = judge.judge(item["text"], QUESTIONS)
+                # Keep the probability of each outcome; for yes/no questions only P(true).
+                # 0.5 = no information, used if the judge did not report the "true" outcome.
                 return {
                     "id": item["id"], "latency": v.latency_s, "cost": v.cost_usd, "error": None,
                     "team": v["team"].probabilities, "urgent": v["urgent"].probabilities.get("true", 0.5),
@@ -57,22 +66,27 @@ def run_judge(judge, items: list[dict], workers: int, label: str = "run", resume
     start = time.perf_counter()
     RESULTS.mkdir(exist_ok=True)
     errors = 0
+    # Tickets are judged in parallel by a thread pool (the calls are network/IO bound);
+    # pool.map yields results in ticket order, so progress and the saved file stay ordered.
     with ThreadPoolExecutor(workers) as pool:
         for n, row in enumerate(pool.map(one, todo), 1):
             done[row["id"]] = row
             errors += bool(row["error"])
+            # Linear ETA: average time per finished ticket times tickets still to do.
             elapsed = time.perf_counter() - start
             eta = elapsed / n * (len(todo) - n)
             status = f"ERROR {row['error']}" if row["error"] else f"{row['latency']:.1f}s"
             print(f"[{label}] {n}/{len(todo)}  ticket {row['id']}  {status}  elapsed {elapsed:.0f}s  "
                   f"ETA {eta:.0f}s  errors {errors}", flush=True)
             partial.write_text(json.dumps(list(done.values())))
+    # Return rows in the original ticket order; the third value (unused cost slot) is always 0.0.
     rows = [done[i["id"]] for i in items]
     return rows, time.perf_counter() - start, 0.0
 
 
 def run_xgboost(items: list[dict]) -> tuple[list[dict], float, float]:
     """5-fold out-of-fold predictions on TF-IDF features: needs labels for every task."""
+    # Imported here so the other backends run without scikit-learn and xgboost installed.
     import numpy as np
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.model_selection import StratifiedKFold
@@ -80,6 +94,7 @@ def run_xgboost(items: list[dict]) -> tuple[list[dict], float, float]:
 
     texts = [i["text"] for i in items]
     n = len(items)
+    # Same row shape as the judges; latency and cost are zero because inference is local and free.
     rows = [{"id": i["id"], "latency": 0.0, "cost": 0.0, "error": None} for i in items]
     start = time.perf_counter()
     # One independent model per question: the loop below trains a separate
@@ -114,6 +129,7 @@ def run_xgboost(items: list[dict]) -> tuple[list[dict], float, float]:
 
 
 def main() -> None:
+    """Parse options, run the chosen backend over the tickets, and save the results with metadata."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--backend", choices=["jev", "llm", "opendecider", "xgboost"], required=True)
     parser.add_argument("--label", required=True)
@@ -125,6 +141,8 @@ def main() -> None:
                         help="turn <label>.partial.json into <label>.json as-is (no model calls), for an interrupted run")
     args = parser.parse_args()
 
+    # --finalize: convert the partial file of an interrupted run into a normal result file,
+    # without calling any model; unfinished tickets are simply absent and failed ones count as errors.
     if args.finalize:
         rows = json.loads((RESULTS / f"{args.label}.partial.json").read_text())
         bad = sum(1 for r in rows if r.get("error"))
@@ -134,6 +152,7 @@ def main() -> None:
         print(f"{args.label}: finalized {len(rows)} tickets ({bad} errors) -> {args.label}.json")
         return
 
+    # --limit N keeps only the first N tickets (quick tests); 0 means all 120.
     items = dataset.load()[: args.limit or None]
     meta: dict = {"label": args.label, "backend": args.backend, "n": len(items)}
     if args.backend == "xgboost":
@@ -142,16 +161,22 @@ def main() -> None:
     else:
         import os
 
+        # judge_factory reads the backend from the environment and the provider/model from .env.
         os.environ["JUDGE_BACKEND"] = args.backend
         from judge_factory import make_judge
 
+        # --samples N asks the judge N times per question (when the backend supports it).
         judge = make_judge(samples=args.samples)
+        # Record which model answered, for the report.
         meta["model"] = getattr(judge, "model_id", None) or getattr(judge, "model", None) or judge.spec.label
+        # Local models (opendecider, Ollama) handle one request at a time: no parallelism there.
         workers = 1 if args.backend == "opendecider" or str(meta["model"]).startswith("ollama") else args.workers
         rows, wall, _ = run_judge(judge, items, workers, args.label, args.resume)
+    # Total elapsed time of the run, stored next to the per-ticket results.
     meta["wall_seconds"] = round(wall, 2)
     RESULTS.mkdir(exist_ok=True)
     (RESULTS / f"{args.label}.json").write_text(json.dumps({"meta": meta, "rows": rows}, indent=1))
+    # Final one-line summary: tickets processed, failures, time and total cost.
     errors = sum(1 for r in rows if r["error"])
     print(f"{args.label}: {len(rows)} items, {errors} errors, {wall:.1f}s, cost=${sum(r['cost'] for r in rows):.4f}")
 
