@@ -24,6 +24,17 @@ cd /home/thimoty/git/agents-course
 sudo apt update
 sudo apt install -y curl python3 python3-venv python3-pip zstd
 
+## M1 - Setup 0c: Python 3.12 (richiesto: 3.10-3.13, consigliato 3.12)
+# I requirements usano LangChain 1.x, che richiede Python >= 3.10.
+# Con Python 3.8/3.9 pip risponde "No matching distribution found for langchain==1.0.3".
+python3 --version
+# Se la versione e' < 3.10, installa uv (gestore di Python e venv, non serve sudo)
+# e scarica con uv un Python 3.12 accanto a quello di sistema, senza sostituirlo:
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
+uv python install 3.12
+uv python list --only-installed
+
 ## M1 - Setup 1: Installazione Ollama locale
 curl -fsSL https://ollama.com/install.sh | sh
 ollama --version
@@ -43,9 +54,11 @@ ollama run gemma4:e2b "Write one sentence about AI agents."
 git clone https://github.com/thimotyb/building-llm-applications.git
 cd building-llm-applications
 cd ch01
-python3 --version
-python3 -m venv env_ch01
+# Crea il venv con Python 3.12 (--seed installa anche pip nel venv)
+uv venv --python 3.12 --seed env_ch01
+# In alternativa, se python3.12 e' gia' sul sistema: python3.12 -m venv env_ch01
 source env_ch01/bin/activate
+python --version   # deve mostrare 3.12.x
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 pip list
