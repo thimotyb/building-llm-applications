@@ -16,7 +16,12 @@ def get_ddg_instance():
     """Get a singleton instance of DuckDuckGoSearchAPIWrapper."""
     global _ddg_instance
     if _ddg_instance is None:
-        _ddg_instance = DuckDuckGoSearchAPIWrapper()
+        # region="us-en" replaces the wrapper's default "wt-wt" ("no region").
+        # With backend="auto", the ddgs library also queries a Wikipedia engine
+        # that builds its URL from the region's language: with "wt-wt" it calls
+        # https://wt.wikipedia.org, which does not exist, and fails with a DNS
+        # error on every search. "us-en" makes it use en.wikipedia.org.
+        _ddg_instance = DuckDuckGoSearchAPIWrapper(region="us-en")
     return _ddg_instance
 
 def web_search(web_query: str, num_results: int) -> List[str]:

@@ -33,7 +33,9 @@ NUM_SEARCH_RESULTS = 1
 question = 'What can I see and do in the Spanish town Astorga'
 
 ###
-search_engine = DuckDuckGoSearchAPIWrapper()
+# region="us-en" instead of the default "wt-wt": with "wt-wt" the ddgs Wikipedia engine
+# queries https://wt.wikipedia.org, which does not exist (see web_searching.py).
+search_engine = DuckDuckGoSearchAPIWrapper(region="us-en")
 
 # try --- DO NOT INCLUDE
 # results = search_engine.results(question, NUM_SEARCH_RESULTS)
