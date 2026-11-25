@@ -13,7 +13,9 @@ def merge(x):
 
 print(merge(items))
 
-from langchain.prompts import PromptTemplate
+# LangChain 1.x moved these classes: PromptTemplate now lives in langchain_core.prompts
+# (the old langchain.prompts module no longer exists and raised ModuleNotFoundError).
+from langchain_core.prompts import PromptTemplate
 
 ##################################
 prompt_template = PromptTemplate.from_template(
@@ -25,7 +27,8 @@ prompt = prompt_template.format(user_question="what's up?")
 
 
 #### Web search
-from langchain.utilities import DuckDuckGoSearchAPIWrapper
+# LangChain 1.x: the DuckDuckGo wrapper moved from langchain.utilities to langchain_community.utilities.
+from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
 NUM_SEARCH_RESULTS = 1
 question = 'What can I see and do in the Spanish town Astorga'
 
@@ -107,7 +110,9 @@ task: {task}
 """ 
 
 ####
-from langchain.prompts import PromptTemplate
+# LangChain 1.x moved these classes: PromptTemplate now lives in langchain_core.prompts
+# (the old langchain.prompts module no longer exists and raised ModuleNotFoundError).
+from langchain_core.prompts import PromptTemplate
 ASSISTAINT_SELECTION_PROMPT_TEMPLATE = PromptTemplate.from_template(
     ASSISTAINT_SELECTION_INSTRUCTIONS
 )

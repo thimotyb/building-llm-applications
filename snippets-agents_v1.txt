@@ -111,7 +111,9 @@ deactivate
 # Scarica il DB già pronto per risparmiare tempo sugli embedding
 cd ch11
 mkdir -p vectorstore_db
-wget -O database_ollama.zip https://agents-course.netlify.app/assets/database_ollama.zip
+wget -O database_ollama.zip https://github.com/thimotyb/building-llm-applications/releases/download/vectorstores-v1/database_ollama.zip
+# Alternativa da Google Drive (URL tra virgolette):
+# wget -O database_ollama.zip "https://drive.usercontent.google.com/download?id=1G9q0WY2BT-1O46t-Fg7zVkMoRb6qgVpf&export=download&confirm=t"
 unzip database_ollama.zip -d vectorstore_db/
 rm database_ollama.zip
 
@@ -124,7 +126,9 @@ cd ch11
 # Scarica il DB già pronto per risparmiare tempo sugli embedding (Gemini)
 cd ch11
 mkdir -p vectorstore_db
-wget -O database_gemini.zip https://agents-course.netlify.app/assets/database_gemini.zip
+wget -O database_gemini.zip https://github.com/thimotyb/building-llm-applications/releases/download/vectorstores-v1/database_gemini.zip
+# Alternativa da Google Drive (URL tra virgolette):
+# wget -O database_gemini.zip "https://drive.usercontent.google.com/download?id=11nEs1ULNU6fqLGaefg76U-x5ktQunBlN&export=download&confirm=t"
 unzip database_gemini.zip -d vectorstore_db/
 rm database_gemini.zip
 
